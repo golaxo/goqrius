@@ -1,7 +1,10 @@
+![version](https://img.shields.io/github/v/release/golaxo/goqrius)
+[![PR checks](https://github.com/golaxo/goqrius/actions/workflows/pr-checks.yml/badge.svg)](https://github.com/golaxo/goqrius/actions/workflows/pr-checks.yml)
+
 # GoQrius
 
 > [!WARNING]
-> GoQrius is under heavy develpment.
+> GoQrius is under heavy development.
 
 A powerful `filter` query parameter implementation based on [RFC 8040][rfc8040] for filtering and querying data with expressive syntax.
 
