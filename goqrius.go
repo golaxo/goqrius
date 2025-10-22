@@ -18,7 +18,21 @@ func Parse(input string) (Expression, error) {
 	p := New(l)
 	e := p.Parse()
 
-	return e, ParseError{errors: p.Errors()}
+	var err error
+	if len(p.Errors()) > 0 {
+		err = ParseError{errors: p.Errors()}
+	}
+
+	return e, err
+}
+
+func MustParse(input string) Expression {
+	e, err := Parse(input)
+	if err != nil {
+		panic(err)
+	}
+
+	return e
 }
 
 var _ error = new(ParseError)

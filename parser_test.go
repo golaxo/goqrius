@@ -51,22 +51,32 @@ func TestParseExpressions(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			l := lexer.New(tt.input)
-			p := New(l)
-			expr := p.Parse()
+			expr, err := Parse(tt.input)
+			if err != nil {
+				t.Fatalf("err not expected; error=%v", err)
+			}
 
 			if expr == nil {
-				t.Fatalf("expected non-nil expression; errors=%v", p.Errors())
+				t.Fatalf("expected non-nil expression")
 			}
 
 			if got := expr.String(); got != tt.expectedString {
 				t.Fatalf("unexpected AST string. expected=%q got=%q", tt.expectedString, got)
 			}
-
-			if len(p.Errors()) != 0 {
-				t.Fatalf("unexpected parser errors: %v", p.Errors())
-			}
 		})
+	}
+}
+
+func TestEmptyInput(t *testing.T) {
+	t.Parallel()
+
+	expr, err := Parse("")
+	if err != nil {
+		t.Fatalf("err not expected; error=%v", err)
+	}
+
+	if expr != nil {
+		t.Fatalf("expected nil expression")
 	}
 }
 

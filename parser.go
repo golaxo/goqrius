@@ -29,51 +29,6 @@ var precedences = map[token.Type]int{
 	token.LessThanOrEqual:    compare,
 }
 
-// AST nodes
-
-type Node interface{ String() string }
-
-type Expression interface {
-	Node
-	expressionNode()
-}
-
-// Identifier is the Expression to indicate the key of a filter clause, e.g. `name`.
-type Identifier struct{ Value string }
-
-func (i *Identifier) String() string  { return i.Value }
-func (i *Identifier) expressionNode() {}
-
-// IntegerLiteral is the Expression to indicate an int value of a filter clause, e.g. `1`.
-type IntegerLiteral struct{ Value string }
-
-func (il *IntegerLiteral) String() string  { return il.Value }
-func (il *IntegerLiteral) expressionNode() {}
-
-// StringLiteral is the Expression to indicate an int value of a filter clause, e.g. `'John'`.
-type StringLiteral struct{ Value string }
-
-func (sl *StringLiteral) String() string  { return fmt.Sprintf("'%s'", sl.Value) }
-func (sl *StringLiteral) expressionNode() {}
-
-// NotExpr negates an Expression.
-type NotExpr struct{ Right Expression }
-
-func (ne *NotExpr) String() string  { return fmt.Sprintf("(not %s)", ne.Right.String()) }
-func (ne *NotExpr) expressionNode() {}
-
-// FilterExpr represents a key and operator and a value in a filter clause.
-type FilterExpr struct {
-	Left     Expression
-	Operator token.Type
-	Right    Expression
-}
-
-func (ie *FilterExpr) String() string {
-	return fmt.Sprintf("(%s %s %s)", ie.Left.String(), string(ie.Operator), ie.Right.String())
-}
-func (ie *FilterExpr) expressionNode() {}
-
 type Parser struct {
 	l         *lexer.Lexer
 	curToken  token.Token
@@ -81,6 +36,8 @@ type Parser struct {
 	errors    []string
 }
 
+// New creates a new Parser based on a Lexer.
+// It's recommended to use goqrius.Parse instead of this.
 func New(l *lexer.Lexer) *Parser {
 	p := &Parser{
 		l:      l,
