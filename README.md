@@ -11,7 +11,7 @@ A powerful `filter` query parameter implementation based on [RFC 8040][rfc8040] 
 > [!NOTE]  
 > This repository only contains the lexer-parser.
 >
-> To check the current data-layer implementations, check [Implementations](#-implementation).
+> To check the current data-layer implementations, check [Implementations](#-implementations).
 
 ## 🚀 Features
 
@@ -62,7 +62,7 @@ By using:
 filter := "name eq 'John'" // e.g. value retrieved from a query parameter. 
 e, err := goqrius.Parse(filter)
 if err != nil {
-	...
+ ...
 }
 ...
 ```
