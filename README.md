@@ -11,7 +11,7 @@ A powerful `filter` query parameter implementation based on [RFC 8040][rfc8040] 
 > [!NOTE]  
 > This repository only contains the lexer-parser.
 >
-> To check the current data-layer implementations check [Implementation](#-implementation).
+> To check the current data-layer implementations, check [Implementations](#-implementation).
 
 ## 🚀 Features
 
@@ -53,10 +53,21 @@ Then it's expected to filter the following conditions:
 | `age gt 18 and age lt 65` |    ✅    |    ❌    |    ❌     |   ✅    |
 | `age le 18 or age gt 65`  |    ❌    |    ✅    |    ✅     |   ❌    |
 
-## 🔧 Implementation
+## 🔧 Implementations
 
 GoQrius is designed to be easily integrated into your REST API endpoints.
-The filter parameter parses the expression and converts it into executable conditions for your data layer.
+By using:
+
+```go
+filter := "name eq 'John'" // e.g. value retrieved from a query parameter. 
+e, err := goqrius.Parse(filter)
+if err != nil {
+	...
+}
+...
+```
+
+You get the GoQrius expression that can be transformed to a filtering clause in your data layer.
 
 The current data layers implementations for GoQrius are:
 

@@ -1,5 +1,4 @@
-// Package parser parse the filter expression.
-package parser
+package goqrius
 
 import (
 	"fmt"
@@ -11,23 +10,23 @@ import (
 // Precedences.
 const (
 	_ int = iota
-	LOWEST
-	OR      // or
-	AND     // and
-	PREFIX  // not
-	COMPARE // eq, ne, gt, ge, lt, le
+	lowest
+	or      // or
+	and     // and
+	prefix  // not
+	compare // eq, ne, gt, ge, lt, le
 )
 
 //nolint:exhaustive,gochecknoglobals // no need to put all the tokens.
 var precedences = map[token.Type]int{
-	token.Or:                 OR,
-	token.And:                AND,
-	token.Eq:                 COMPARE,
-	token.NotEq:              COMPARE,
-	token.GreaterThan:        COMPARE,
-	token.GreaterThanOrEqual: COMPARE,
-	token.LessThan:           COMPARE,
-	token.LessThanOrEqual:    COMPARE,
+	token.Or:                 or,
+	token.And:                and,
+	token.Eq:                 compare,
+	token.NotEq:              compare,
+	token.GreaterThan:        compare,
+	token.GreaterThanOrEqual: compare,
+	token.LessThan:           compare,
+	token.LessThanOrEqual:    compare,
 }
 
 // AST nodes
@@ -39,36 +38,41 @@ type Expression interface {
 	expressionNode()
 }
 
+// Identifier is the Expression to indicate the key of a filter clause, e.g. `name`.
 type Identifier struct{ Value string }
 
 func (i *Identifier) String() string  { return i.Value }
 func (i *Identifier) expressionNode() {}
 
+// IntegerLiteral is the Expression to indicate an int value of a filter clause, e.g. `1`.
 type IntegerLiteral struct{ Value string }
 
 func (il *IntegerLiteral) String() string  { return il.Value }
 func (il *IntegerLiteral) expressionNode() {}
 
+// StringLiteral is the Expression to indicate an int value of a filter clause, e.g. `'John'`.
 type StringLiteral struct{ Value string }
 
 func (sl *StringLiteral) String() string  { return fmt.Sprintf("'%s'", sl.Value) }
 func (sl *StringLiteral) expressionNode() {}
 
+// NotExpr negates an Expression.
 type NotExpr struct{ Right Expression }
 
 func (ne *NotExpr) String() string  { return fmt.Sprintf("(not %s)", ne.Right.String()) }
 func (ne *NotExpr) expressionNode() {}
 
-type InfixExpr struct {
+// FilterExpr represents a key and operator and a value in a filter clause.
+type FilterExpr struct {
 	Left     Expression
 	Operator token.Type
 	Right    Expression
 }
 
-func (ie *InfixExpr) String() string {
+func (ie *FilterExpr) String() string {
 	return fmt.Sprintf("(%s %s %s)", ie.Left.String(), string(ie.Operator), ie.Right.String())
 }
-func (ie *InfixExpr) expressionNode() {}
+func (ie *FilterExpr) expressionNode() {}
 
 type Parser struct {
 	l         *lexer.Lexer
@@ -99,7 +103,7 @@ func (p *Parser) Parse() Expression {
 		p.nextToken()
 	}
 
-	expr := p.parseExpression(LOWEST)
+	expr := p.parseExpression(lowest)
 
 	// consume trailing tokens until EOF
 	for p.peekToken.Type != token.EOF {
@@ -128,7 +132,7 @@ func (p *Parser) peekPrecedence() int {
 		return pr
 	}
 
-	return LOWEST
+	return lowest
 }
 
 func (p *Parser) curPrecedence() int {
@@ -136,7 +140,7 @@ func (p *Parser) curPrecedence() int {
 		return pr
 	}
 
-	return LOWEST
+	return lowest
 }
 
 func (p *Parser) peekError(t token.Type) {
@@ -156,12 +160,12 @@ func (p *Parser) parseExpression(precedence int) Expression {
 		leftExp = &StringLiteral{Value: p.curToken.Literal}
 	case token.Not:
 		p.nextToken()
-		right := p.parseExpression(PREFIX)
+		right := p.parseExpression(prefix)
 		leftExp = &NotExpr{Right: right}
 	case token.Lparen:
 		p.nextToken()
 
-		leftExp = p.parseExpression(LOWEST)
+		leftExp = p.parseExpression(lowest)
 		if !p.expectPeek(token.Rparen) {
 			return nil
 		}
@@ -182,7 +186,7 @@ func (p *Parser) parseExpression(precedence int) Expression {
 			prec := p.curPrecedence()
 			p.nextToken() // advance to the right expression's first token
 			right := p.parseExpression(prec)
-			leftExp = &InfixExpr{Left: leftExp, Operator: op, Right: right}
+			leftExp = &FilterExpr{Left: leftExp, Operator: op, Right: right}
 		default:
 			return leftExp
 		}
