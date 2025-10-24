@@ -6,7 +6,7 @@
 > [!WARNING]
 > GoQrius is under heavy development.
 
-A powerful `filter` query parameter implementation based on [RFC 8040][rfc8040] for filtering and querying data with expressive syntax.
+A powerful `filter` query parameter implementation based on [Microsoft API Guidelines][api-guidelines] for filtering and querying data with expressive syntax.
 
 > [!NOTE]  
 > This repository only contains the lexer-parser.
@@ -73,4 +73,4 @@ The current data layers implementations for GoQrius are:
 
 - [GormGoQrius](https://github.com/golaxo/gormgoqrius)
 
-[rfc8040]: https://www.rfc-editor.org/rfc/rfc8040.html#section-4.8.4
+[api-guidelines]: https://github.com/microsoft/api-guidelines/blob/vNext/graph/Guidelines-deprecated.md#971-filter-operations
