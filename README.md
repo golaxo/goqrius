@@ -6,7 +6,8 @@
 > [!WARNING]
 > GoQrius is under heavy development.
 
-A powerful `filter` query parameter implementation based on [Microsoft API Guidelines][api-guidelines] for filtering and querying data with expressive syntax.
+A powerful `filter` query parameter implementation based on [Microsoft API Guidelines][api-guidelines] 
+for filtering and querying data with expressive syntax.
 
 > [!NOTE]  
 > This repository only contains the lexer-parser.

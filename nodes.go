@@ -17,15 +17,6 @@ type (
 	}
 )
 
-func (i *Identifier) String() string  { return i.Value }
-func (i *Identifier) expressionNode() {}
-
-func (il *IntegerLiteral) String() string  { return il.Value }
-func (il *IntegerLiteral) expressionNode() {}
-
-func (sl *StringLiteral) String() string  { return fmt.Sprintf("'%s'", sl.Value) }
-func (sl *StringLiteral) expressionNode() {}
-
 type (
 	// Identifier is the Expression to indicate the key of a filter clause, e.g. `name`.
 	Identifier struct {
@@ -42,6 +33,15 @@ type (
 		Value string
 	}
 )
+
+func (i *Identifier) String() string  { return i.Value }
+func (i *Identifier) expressionNode() {}
+
+func (il *IntegerLiteral) String() string  { return il.Value }
+func (il *IntegerLiteral) expressionNode() {}
+
+func (sl *StringLiteral) String() string  { return fmt.Sprintf("'%s'", sl.Value) }
+func (sl *StringLiteral) expressionNode() {}
 
 type (
 	// NotExpr negates an Expression.
