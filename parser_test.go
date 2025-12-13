@@ -17,6 +17,18 @@ func TestParseExpressions(t *testing.T) {
 			input:          "name eq value",
 			expectedString: "(name eq value)",
 		},
+		"simple ident eq null": {
+			input:          "name eq null",
+			expectedString: "(name eq null)",
+		},
+		"simple ident ne null": {
+			input:          "name ne null",
+			expectedString: "(name ne null)",
+		},
+		"not null literal": {
+			input:          "not null",
+			expectedString: "(not null)",
+		},
 		"ident eq string": {
 			input:          "name eq 'john'",
 			expectedString: "(name eq 'john')",
@@ -41,9 +53,25 @@ func TestParseExpressions(t *testing.T) {
 			input:          "user.name eq 'john'",
 			expectedString: "(user.name eq 'john')",
 		},
+		"identifier named NULL stays ident (case-sensitive)": {
+			input:          "NULL eq 1",
+			expectedString: "(NULL eq 1)",
+		},
+		"identifier named Null stays ident (case-sensitive)": {
+			input:          "Null eq 1",
+			expectedString: "(Null eq 1)",
+		},
+		"parentheses around null are allowed": {
+			input:          "(null)",
+			expectedString: "null",
+		},
 		"identifier with dash": {
 			input:          "user-name eq 1",
 			expectedString: "(user-name eq 1)",
+		},
+		"mixed precedence with null": {
+			input:          "name eq null or not age ge 18",
+			expectedString: "((name eq null) or (not (age ge 18)))",
 		},
 	}
 

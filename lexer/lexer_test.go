@@ -28,6 +28,30 @@ func TestNextToken(t *testing.T) {
 				{token.EOF, ""},
 			},
 		},
+		"simple equal null": {
+			input: `key eq null`,
+			expected: []struct {
+				expectedType    token.Type
+				expectedLiteral string
+			}{
+				{token.Ident, "key"},
+				{token.Eq, string(token.Eq)},
+				{token.Null, "null"},
+				{token.EOF, ""},
+			},
+		},
+		"simple not equal null": {
+			input: `key ne null`,
+			expected: []struct {
+				expectedType    token.Type
+				expectedLiteral string
+			}{
+				{token.Ident, "key"},
+				{token.NotEq, string(token.NotEq)},
+				{token.Null, "null"},
+				{token.EOF, ""},
+			},
+		},
 		"simple not equal condition": {
 			input: `key ne value`,
 			expected: []struct {
@@ -133,6 +157,17 @@ func TestNextToken(t *testing.T) {
 				{token.EOF, ""},
 			},
 		},
+		"not null condition": {
+			input: `not null`,
+			expected: []struct {
+				expectedType    token.Type
+				expectedLiteral string
+			}{
+				{token.Not, string(token.Not)},
+				{token.Null, string(token.Null)},
+				{token.EOF, ""},
+			},
+		},
 		"parenthesis condition": {
 			input: `(age gt 0 and age le 18)`,
 			expected: []struct {
@@ -148,6 +183,41 @@ func TestNextToken(t *testing.T) {
 				{token.LessThanOrEqual, string(token.LessThanOrEqual)},
 				{token.Int, "18"},
 				{token.Rparen, string(token.Rparen)},
+			},
+		},
+		"parenthesis around null": {
+			input: `(null)`,
+			expected: []struct {
+				expectedType    token.Type
+				expectedLiteral string
+			}{
+				{token.Lparen, string(token.Lparen)},
+				{token.Null, string(token.Null)},
+				{token.Rparen, string(token.Rparen)},
+			},
+		},
+		"uppercased NULL is identifier": {
+			input: `NULL eq 1`,
+			expected: []struct {
+				expectedType    token.Type
+				expectedLiteral string
+			}{
+				{token.Ident, "NULL"},
+				{token.Eq, string(token.Eq)},
+				{token.Int, "1"},
+				{token.EOF, ""},
+			},
+		},
+		"capitalized Null is identifier": {
+			input: `Null eq 1`,
+			expected: []struct {
+				expectedType    token.Type
+				expectedLiteral string
+			}{
+				{token.Ident, "Null"},
+				{token.Eq, string(token.Eq)},
+				{token.Int, "1"},
+				{token.EOF, ""},
 			},
 		},
 		"multiple conditions with parenthesis": {

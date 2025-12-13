@@ -115,6 +115,8 @@ func (p *Parser) parseExpression(precedence int) Expression {
 		leftExp = &IntegerLiteral{Value: p.curToken.Literal}
 	case token.String:
 		leftExp = &StringLiteral{Value: p.curToken.Literal}
+	case token.Null:
+		leftExp = &Null{}
 	case token.Not:
 		p.nextToken()
 		right := p.parseExpression(prefix)

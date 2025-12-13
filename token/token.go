@@ -12,6 +12,7 @@ const (
 	Ident  Type = "Ident"
 	Int    Type = "Int"
 	String Type = "String"
+	Null   Type = "null"
 
 	/* Comparison Operators. */
 

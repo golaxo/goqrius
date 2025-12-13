@@ -69,6 +69,8 @@ func (l *Lexer) NextToken() token.Token {
 	// Identifiers and keywords (and, or, not, eq, ne, gt, ge, lt, le)
 	ident := l.readWhile(isIdentChar)
 	switch ident {
+	case string(token.Null):
+		return newTokenFromType(token.Null)
 	case string(token.And):
 		return newTokenFromType(token.And)
 	case string(token.Or):
