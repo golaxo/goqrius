@@ -26,6 +26,8 @@ func New(input string) *Lexer {
 }
 
 // NextToken returns the next token parsed, or token.EOF if finished.
+//
+//nolint:funlen // refactor later
 func (l *Lexer) NextToken() token.Token {
 	l.skipWhitespace()
 
@@ -68,7 +70,21 @@ func (l *Lexer) NextToken() token.Token {
 
 	// Identifiers and keywords (and, or, not, eq, ne, gt, ge, lt, le)
 	ident := l.readWhile(isIdentChar)
+	// If we didn't read any identifier characters, this is an unknown/illegal character.
+	if ident == "" {
+		// consume the offending character and return Illegal so the parser can handle it
+		if offendingCh, isOk := l.peekChar(); isOk {
+			l.readChar()
+
+			return token.Token{Type: token.Illegal, Literal: string(offendingCh)}
+		}
+
+		return token.Token{Type: token.EOF, Literal: ""}
+	}
+
 	switch ident {
+	case string(token.Null):
+		return newTokenFromType(token.Null)
 	case string(token.And):
 		return newTokenFromType(token.And)
 	case string(token.Or):

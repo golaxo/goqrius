@@ -28,6 +28,9 @@ type (
 		Value string
 	}
 
+	// Null is the Expression to indicate a value that is null.
+	Null struct{}
+
 	// StringLiteral is the Expression to indicate an int value of a filter clause, e.g. `'John'`.
 	StringLiteral struct {
 		Value string
@@ -39,6 +42,9 @@ func (i *Identifier) expressionNode() {}
 
 func (il *IntegerLiteral) String() string  { return il.Value }
 func (il *IntegerLiteral) expressionNode() {}
+
+func (il *Null) String() string  { return "null" }
+func (il *Null) expressionNode() {}
 
 func (sl *StringLiteral) String() string  { return fmt.Sprintf("'%s'", sl.Value) }
 func (sl *StringLiteral) expressionNode() {}
