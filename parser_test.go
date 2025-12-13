@@ -3,7 +3,7 @@ package goqrius
 import (
 	"testing"
 
-	"github.com/golaxo/goqrius/lexer"
+	"github.com/golaxo/goqrius/internal/lexer"
 )
 
 func TestParseExpressions(t *testing.T) {
@@ -100,12 +100,23 @@ func TestEmptyInput(t *testing.T) {
 	}
 }
 
+func TestMustParseEmptyInput(t *testing.T) {
+	t.Parallel()
+
+	expr := MustParse("")
+	if expr != nil {
+		t.Fatalf("expected nil expression")
+	}
+}
+
 func TestParseErrors(t *testing.T) {
 	t.Parallel()
 
 	tests := map[string]string{
 		"missing closing paren":      "(name eq 'John'",
 		"unknown prefix":             "@ eq 1",
+		"int as left side":           "1 gt 2",
+		"string in left side":        "'name' eq 'John'",
 		"not null is invalid":        "not null",
 		"bare null is invalid":       "null",
 		"paren bare null is invalid": "(null)",
@@ -122,8 +133,8 @@ func TestParseErrors(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			p := New(lexer.New(input))
-			_ = p.Parse()
+			p := newParser(lexer.New(input))
+			_ = p.parse()
 
 			if len(p.Errors()) == 0 {
 				t.Fatalf("expected errors, got none for input: %q", input)

@@ -3,7 +3,7 @@ package goqrius
 import (
 	"fmt"
 
-	"github.com/golaxo/goqrius/token"
+	"github.com/golaxo/goqrius/internal/token"
 )
 
 type (

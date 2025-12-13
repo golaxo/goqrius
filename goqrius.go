@@ -2,9 +2,7 @@
 package goqrius
 
 import (
-	"strings"
-
-	"github.com/golaxo/goqrius/lexer"
+	"github.com/golaxo/goqrius/internal/lexer"
 )
 
 // Parse the input filter expression to a goqrius Expression.
@@ -15,8 +13,8 @@ func Parse(input string) (Expression, error) {
 	}
 
 	l := lexer.New(input)
-	p := New(l)
-	e := p.Parse()
+	p := newParser(l)
+	e := p.parse()
 
 	var err error
 	if len(p.Errors()) > 0 {
@@ -33,14 +31,4 @@ func MustParse(input string) Expression {
 	}
 
 	return e
-}
-
-var _ error = new(ParseError)
-
-type ParseError struct {
-	errors []string
-}
-
-func (p ParseError) Error() string {
-	return strings.Join(p.errors, ",")
 }
