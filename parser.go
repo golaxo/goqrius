@@ -68,7 +68,7 @@ func (p *parser) parse() Expression {
 	}
 
 	// validate semantic constraints (e.g., null usage)
-	p.validateNullUsage(expr, false)
+	p.validate(expr, true, nil)
 
 	return expr
 }
@@ -157,32 +157,36 @@ func (p *parser) parseExpression(precedence int) Expression {
 	return leftExp
 }
 
-// validateNullUsage walks the expression to ensure `null` appears only
-// as the right operand of eq/ne. Any other use (e.g., not null, bare null,
-// null on the left, or with other comparison operators) is recorded as an error.
-// allowedCtx indicates whether `null` is allowed at this position in the tree.
-func (p *parser) validateNullUsage(expr Expression, allowedCtx bool) {
+func (p *parser) validate(expr Expression, isLeft bool, parentFilterExpression *FilterExpr) {
 	if expr == nil {
 		return
 	}
 
 	switch e := expr.(type) {
 	case *Null:
-		if !allowedCtx {
+		if isLeft {
+			p.errors = append(p.errors, "invalid use of null: only allowed as right side of 'eq' or 'ne'")
+
+			return
+		}
+
+		if parentFilterExpression == nil ||
+			parentFilterExpression.Operator != token.Eq &&
+				parentFilterExpression.Operator != token.NotEq {
 			p.errors = append(p.errors, "invalid use of null: only allowed as right side of 'eq' or 'ne'")
 		}
-	case *Identifier, *IntegerLiteral, *StringLiteral:
-		// terminals without children; nothing to validate further
+	case *Identifier:
 		return
+	case *IntegerLiteral, *StringLiteral:
+		if isLeft {
+			p.errors = append(p.errors, "invalid use of literals: only allowed as right side")
+		}
 	case *NotExpr:
 		// `not null` (directly or via grouping) is invalid
-		p.validateNullUsage(e.Right, false)
+		p.validate(e.Right, false, nil)
 	case *FilterExpr:
 		// Left side can never be null
-		p.validateNullUsage(e.Left, false)
-
-		// Right side may allow null only for eq/ne
-		allowRightNull := e.Operator == token.Eq || e.Operator == token.NotEq
-		p.validateNullUsage(e.Right, allowRightNull)
+		p.validate(e.Left, true, e)
+		p.validate(e.Right, false, e)
 	}
 }

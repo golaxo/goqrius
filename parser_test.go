@@ -115,6 +115,8 @@ func TestParseErrors(t *testing.T) {
 	tests := map[string]string{
 		"missing closing paren":      "(name eq 'John'",
 		"unknown prefix":             "@ eq 1",
+		"int as left side":           "1 gt 2",
+		"string in left side":        "'name' eq 'John'",
 		"not null is invalid":        "not null",
 		"bare null is invalid":       "null",
 		"paren bare null is invalid": "(null)",
