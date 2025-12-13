@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.4](https://github.com/golaxo/goqrius/compare/v0.0.3...v0.0.4) (2025-12-13)
+
+
+### Miscellaneous Chores
+
+* release 0.0.4 ([357e48c](https://github.com/golaxo/goqrius/commit/357e48cd5c52e0296b2ae4d4e52bc5e3ce1e2ef5))
+
 ## [0.0.3](https://github.com/golaxo/goqrius/compare/v0.0.2...v0.0.3) (2025-12-13)
 
 
