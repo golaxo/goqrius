@@ -3,8 +3,8 @@ package goqrius
 import (
 	"fmt"
 
-	"github.com/golaxo/goqrius/lexer"
-	"github.com/golaxo/goqrius/token"
+	"github.com/golaxo/goqrius/internal/lexer"
+	"github.com/golaxo/goqrius/internal/token"
 )
 
 // Precedences.

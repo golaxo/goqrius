@@ -3,7 +3,7 @@ package goqrius
 import (
 	"testing"
 
-	"github.com/golaxo/goqrius/lexer"
+	"github.com/golaxo/goqrius/internal/lexer"
 )
 
 func TestParseExpressions(t *testing.T) {
