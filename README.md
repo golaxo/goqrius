@@ -7,6 +7,7 @@
 > GoQrius is under heavy development.
 
 A powerful `filter` query parameter implementation based on [Microsoft API Guidelines][api-guidelines] 
+and [OData filter][odata-filter]
 for filtering and querying data with expressive syntax.
 
 > [!NOTE]  
@@ -75,3 +76,4 @@ The current data layers implementations for GoQrius are:
 - [GormGoQrius](https://github.com/golaxo/gormgoqrius)
 
 [api-guidelines]: https://github.com/microsoft/api-guidelines/blob/vNext/graph/Guidelines-deprecated.md#971-filter-operations
+[odata-filter]: https://www.odata.org/getting-started/basic-tutorial/#filter
