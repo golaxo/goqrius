@@ -29,7 +29,7 @@ var precedences = map[token.Type]int{
 	token.LessThanOrEqual:    compare,
 }
 
-type Parser struct {
+type parser struct {
 	l         *lexer.Lexer
 	curToken  token.Token
 	peekToken token.Token
@@ -38,8 +38,8 @@ type Parser struct {
 
 // New creates a new Parser based on a Lexer.
 // It's recommended to use goqrius.Parse instead of this.
-func New(l *lexer.Lexer) *Parser {
-	p := &Parser{
+func newParser(l *lexer.Lexer) *parser {
+	p := &parser{
 		l:      l,
 		errors: make([]string, 0),
 	}
@@ -50,10 +50,10 @@ func New(l *lexer.Lexer) *Parser {
 	return p
 }
 
-func (p *Parser) Errors() []string { return p.errors }
+func (p *parser) Errors() []string { return p.errors }
 
 // Parse parses the whole input into an Expression AST.
-func (p *Parser) Parse() Expression {
+func (p *parser) parse() Expression {
 	// Start by advancing to the first actual token if cur is zero-value
 	if p.curToken.Type == "" && p.peekToken.Type == "" {
 		p.nextToken()
@@ -73,9 +73,9 @@ func (p *Parser) Parse() Expression {
 	return expr
 }
 
-func (p *Parser) nextToken() { p.curToken = p.peekToken; p.peekToken = p.l.NextToken() }
+func (p *parser) nextToken() { p.curToken = p.peekToken; p.peekToken = p.l.NextToken() }
 
-func (p *Parser) expectPeek(t token.Type) bool {
+func (p *parser) expectPeek(t token.Type) bool {
 	if p.peekToken.Type == t {
 		p.nextToken()
 
@@ -87,7 +87,7 @@ func (p *Parser) expectPeek(t token.Type) bool {
 	return false
 }
 
-func (p *Parser) peekPrecedence() int {
+func (p *parser) peekPrecedence() int {
 	if pr, ok := precedences[p.peekToken.Type]; ok {
 		return pr
 	}
@@ -95,7 +95,7 @@ func (p *Parser) peekPrecedence() int {
 	return lowest
 }
 
-func (p *Parser) curPrecedence() int {
+func (p *parser) curPrecedence() int {
 	if pr, ok := precedences[p.curToken.Type]; ok {
 		return pr
 	}
@@ -103,11 +103,11 @@ func (p *Parser) curPrecedence() int {
 	return lowest
 }
 
-func (p *Parser) peekError(t token.Type) {
+func (p *parser) peekError(t token.Type) {
 	p.errors = append(p.errors, fmt.Sprintf("expected next token to be %q, got %q instead", t, p.peekToken.Type))
 }
 
-func (p *Parser) parseExpression(precedence int) Expression {
+func (p *parser) parseExpression(precedence int) Expression {
 	var leftExp Expression
 
 	//nolint:exhaustive // no need.
@@ -161,7 +161,7 @@ func (p *Parser) parseExpression(precedence int) Expression {
 // as the right operand of eq/ne. Any other use (e.g., not null, bare null,
 // null on the left, or with other comparison operators) is recorded as an error.
 // allowedCtx indicates whether `null` is allowed at this position in the tree.
-func (p *Parser) validateNullUsage(expr Expression, allowedCtx bool) {
+func (p *parser) validateNullUsage(expr Expression, allowedCtx bool) {
 	if expr == nil {
 		return
 	}

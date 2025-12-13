@@ -100,6 +100,15 @@ func TestEmptyInput(t *testing.T) {
 	}
 }
 
+func TestMustParseEmptyInput(t *testing.T) {
+	t.Parallel()
+
+	expr := MustParse("")
+	if expr != nil {
+		t.Fatalf("expected nil expression")
+	}
+}
+
 func TestParseErrors(t *testing.T) {
 	t.Parallel()
 
@@ -122,8 +131,8 @@ func TestParseErrors(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			p := New(lexer.New(input))
-			_ = p.Parse()
+			p := newParser(lexer.New(input))
+			_ = p.parse()
 
 			if len(p.Errors()) == 0 {
 				t.Fatalf("expected errors, got none for input: %q", input)

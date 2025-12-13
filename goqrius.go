@@ -13,8 +13,8 @@ func Parse(input string) (Expression, error) {
 	}
 
 	l := lexer.New(input)
-	p := New(l)
-	e := p.Parse()
+	p := newParser(l)
+	e := p.parse()
 
 	var err error
 	if len(p.Errors()) > 0 {
