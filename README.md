@@ -6,7 +6,7 @@
 > [!WARNING]
 > GoQrius is under heavy development.
 
-A powerful `filter` query parameter implementation based on [Microsoft API Guidelines][api-guidelines] 
+A powerful `filter` query parameter implementation based on [Microsoft API Guidelines][api-guidelines]
 and [OData filter][odata-filter]
 for filtering and querying data with expressive syntax.
 
