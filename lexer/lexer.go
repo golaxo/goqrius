@@ -68,6 +68,16 @@ func (l *Lexer) NextToken() token.Token {
 
 	// Identifiers and keywords (and, or, not, eq, ne, gt, ge, lt, le)
 	ident := l.readWhile(isIdentChar)
+	// If we didn't read any identifier characters, this is an unknown/illegal character.
+	if ident == "" {
+		// consume the offending character and return Illegal so the parser can handle it
+		if ch, ok := l.peekChar(); ok {
+			l.readChar()
+			return token.Token{Type: token.Illegal, Literal: string(ch)}
+		}
+		return token.Token{Type: token.EOF, Literal: ""}
+	}
+
 	switch ident {
 	case string(token.Null):
 		return newTokenFromType(token.Null)

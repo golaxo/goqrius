@@ -67,6 +67,9 @@ func (p *Parser) Parse() Expression {
 		p.nextToken()
 	}
 
+	// validate semantic constraints (e.g., null usage)
+	p.validateNullUsage(expr, false)
+
 	return expr
 }
 
@@ -152,4 +155,34 @@ func (p *Parser) parseExpression(precedence int) Expression {
 	}
 
 	return leftExp
+}
+
+// validateNullUsage walks the expression to ensure `null` appears only
+// as the right operand of eq/ne. Any other use (e.g., not null, bare null,
+// null on the left, or with other comparison operators) is recorded as an error.
+// allowedCtx indicates whether `null` is allowed at this position in the tree.
+func (p *Parser) validateNullUsage(expr Expression, allowedCtx bool) {
+	if expr == nil {
+		return
+	}
+
+	switch e := expr.(type) {
+	case *Null:
+		if !allowedCtx {
+			p.errors = append(p.errors, "invalid use of null: only allowed as right side of 'eq' or 'ne'")
+		}
+	case *Identifier, *IntegerLiteral, *StringLiteral:
+		// terminals without children; nothing to validate further
+		return
+	case *NotExpr:
+		// `not null` (directly or via grouping) is invalid
+		p.validateNullUsage(e.Right, false)
+	case *FilterExpr:
+		// Left side can never be null
+		p.validateNullUsage(e.Left, false)
+
+		// Right side may allow null only for eq/ne
+		allowRightNull := e.Operator == token.Eq || e.Operator == token.NotEq
+		p.validateNullUsage(e.Right, allowRightNull)
+	}
 }

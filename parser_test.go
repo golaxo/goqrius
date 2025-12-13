@@ -25,10 +25,6 @@ func TestParseExpressions(t *testing.T) {
 			input:          "name ne null",
 			expectedString: "(name ne null)",
 		},
-		"not null literal": {
-			input:          "not null",
-			expectedString: "(not null)",
-		},
 		"ident eq string": {
 			input:          "name eq 'john'",
 			expectedString: "(name eq 'john')",
@@ -60,10 +56,6 @@ func TestParseExpressions(t *testing.T) {
 		"identifier named Null stays ident (case-sensitive)": {
 			input:          "Null eq 1",
 			expectedString: "(Null eq 1)",
-		},
-		"parentheses around null are allowed": {
-			input:          "(null)",
-			expectedString: "null",
 		},
 		"identifier with dash": {
 			input:          "user-name eq 1",
@@ -112,16 +104,25 @@ func TestParseErrors(t *testing.T) {
 	t.Parallel()
 
 	tests := map[string]string{
-		"missing closing paren": "(name eq 'John'",
-		"unknown prefix":        "@ eq 1",
+		"missing closing paren":      "(name eq 'John'",
+		"unknown prefix":             "@ eq 1",
+		"not null is invalid":        "not null",
+		"bare null is invalid":       "null",
+		"paren bare null is invalid": "(null)",
+		"null on left is invalid":    "null eq name",
+		"gt null is invalid":         "name gt null",
+		"ge null is invalid":         "name ge null",
+		"lt null is invalid":         "name lt null",
+		"le null is invalid":         "name le null",
+		"eq not null is invalid":     "name eq not null",
+		"eq (not null) is invalid":   "name eq (not null)",
 	}
 
 	for name, input := range tests {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			l := lexer.New(input)
-			p := New(l)
+			p := New(lexer.New(input))
 			_ = p.Parse()
 
 			if len(p.Errors()) == 0 {
