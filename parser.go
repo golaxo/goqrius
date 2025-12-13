@@ -62,8 +62,20 @@ func (p *parser) parse() Expression {
 
 	expr := p.parseExpression(lowest)
 
-	// consume trailing tokens until EOF
+	// consume trailing tokens until EOF and report unexpected leftovers
+	//nolint:exhaustive // no need
 	for p.peekToken.Type != token.EOF {
+		switch p.peekToken.Type {
+		case token.Ident:
+			// identifier directly after a complete expression likely means an unknown operator
+			p.errors = append(p.errors, fmt.Sprintf("unknown operator %q", p.peekToken.Literal))
+		case token.Rparen:
+			// stray closing paren
+			p.errors = append(p.errors, "unexpected closing parenthesis")
+		default:
+			p.errors = append(p.errors, fmt.Sprintf("unexpected token %q", p.peekToken.Type))
+		}
+
 		p.nextToken()
 	}
 
