@@ -28,7 +28,7 @@ type (
 		Value string
 	}
 
-	// Null is the Expression to indicate a value that is null
+	// Null is the Expression to indicate a value that is null.
 	Null struct{}
 
 	// StringLiteral is the Expression to indicate an int value of a filter clause, e.g. `'John'`.
