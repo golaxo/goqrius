@@ -2,7 +2,7 @@
 package goqrius
 
 import (
-	"github.com/golaxo/goqrius/internal/lexer"
+	"github.com/golaxo/goqrius/lexer"
 )
 
 // Parse the input filter expression to a goqrius Expression.

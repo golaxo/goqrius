@@ -3,7 +3,7 @@ package lexer
 import (
 	"testing"
 
-	"github.com/golaxo/goqrius/internal/token"
+	"github.com/golaxo/goqrius/token"
 )
 
 func TestNextToken(t *testing.T) {
