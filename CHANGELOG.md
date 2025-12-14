@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.0.5](https://github.com/golaxo/goqrius/compare/v0.0.4...v0.0.5) (2025-12-14)
+
+
+### Bug Fixes
+
+* error when unknown operators ([#25](https://github.com/golaxo/goqrius/issues/25)) ([1d2327b](https://github.com/golaxo/goqrius/commit/1d2327b079be4ee537c3f3d826580e74ae7aecaa))
+* improving nodes ([b163efd](https://github.com/golaxo/goqrius/commit/b163efd67d6307105df7a244b260d915693288d2))
+
 ## [0.0.4](https://github.com/golaxo/goqrius/compare/v0.0.3...v0.0.4) (2025-12-13)
 
 
