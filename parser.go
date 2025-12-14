@@ -176,7 +176,7 @@ func (p *parser) parseExpression(precedence int) Expression {
 				ident = &Identifier{Value: ""}
 			}
 
-			leftExp = &FilterExpr{Left: *ident, Operator: FilterOperator(operator), Right: val}
+			leftExp = &FilterExpr{Left: ident, Operator: FilterOperator(operator), Right: val}
 		default:
 			return leftExp
 		}

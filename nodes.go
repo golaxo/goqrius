@@ -49,7 +49,7 @@ type (
 
 	// FilterExpr represents a key and operator and a value in a filter clause.
 	FilterExpr struct {
-		Left     Identifier
+		Left     *Identifier
 		Operator FilterOperator
 		Right    Value
 	}
