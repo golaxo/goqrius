@@ -3,7 +3,7 @@ package lexer
 import (
 	"unicode"
 
-	"github.com/golaxo/goqrius/token"
+	"github.com/golaxo/goqrius/internal/token"
 )
 
 // Lexer to parse the input.
