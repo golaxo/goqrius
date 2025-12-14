@@ -3,7 +3,7 @@ package goqrius
 import (
 	"testing"
 
-	"github.com/golaxo/goqrius/lexer"
+	"github.com/golaxo/goqrius/internal/lexer"
 )
 
 func TestParseExpressions(t *testing.T) {
@@ -13,10 +13,6 @@ func TestParseExpressions(t *testing.T) {
 		input          string
 		expectedString string
 	}{
-		"simple ident eq ident": {
-			input:          "name eq value",
-			expectedString: "(name eq value)",
-		},
 		"simple ident eq null": {
 			input:          "name eq null",
 			expectedString: "(name eq null)",
@@ -113,6 +109,7 @@ func TestParseErrors(t *testing.T) {
 	t.Parallel()
 
 	tests := map[string]string{
+		"identifier as value":        "name eq value",
 		"missing closing paren":      "(name eq 'John'",
 		"unknown prefix":             "@ eq 1",
 		"unknown operator is":        "name is null",

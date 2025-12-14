@@ -3,8 +3,8 @@ package goqrius
 import (
 	"fmt"
 
-	"github.com/golaxo/goqrius/lexer"
-	"github.com/golaxo/goqrius/token"
+	"github.com/golaxo/goqrius/internal/lexer"
+	"github.com/golaxo/goqrius/internal/token"
 )
 
 // Precedences.
@@ -36,14 +36,11 @@ type parser struct {
 	errors    []string
 }
 
-// New creates a new Parser based on a Lexer.
-// It's recommended to use goqrius.Parse instead of this.
+// New creates a new parser based on a lexer.Lexer.
 func newParser(l *lexer.Lexer) *parser {
-	p := &parser{
-		l:      l,
-		errors: make([]string, 0),
-	}
-	// Initialize tokens
+	p := &parser{l: l}
+
+	// Read two tokens, so curToken and peekToken are both set
 	p.nextToken()
 	p.nextToken()
 
@@ -52,115 +49,134 @@ func newParser(l *lexer.Lexer) *parser {
 
 func (p *parser) Errors() []string { return p.errors }
 
-// Parse parses the whole input into an Expression AST.
+func (p *parser) nextToken() {
+	p.curToken = p.peekToken
+	p.peekToken = p.l.NextToken()
+}
+
 func (p *parser) parse() Expression {
-	// Start by advancing to the first actual token if cur is zero-value
-	if p.curToken.Type == "" && p.peekToken.Type == "" {
-		p.nextToken()
-		p.nextToken()
+	// handle empty input
+	if p.curToken.Type == token.EOF && p.peekToken.Type == token.EOF {
+		return nil
 	}
 
 	expr := p.parseExpression(lowest)
 
-	// consume trailing tokens until EOF and report unexpected leftovers
-	//nolint:exhaustive // no need
-	for p.peekToken.Type != token.EOF {
-		switch p.peekToken.Type {
-		case token.Ident:
-			// identifier directly after a complete expression likely means an unknown operator
-			p.errors = append(p.errors, fmt.Sprintf("unknown operator %q", p.peekToken.Literal))
-		case token.Rparen:
-			// stray closing paren
-			p.errors = append(p.errors, "unexpected closing parenthesis")
-		default:
-			p.errors = append(p.errors, fmt.Sprintf("unexpected token %q", p.peekToken.Type))
-		}
-
-		p.nextToken()
+	// if expression is a bare value or identifier, it's invalid
+	switch expr.(type) {
+	case *IntegerLiteral, *StringLiteral, *Null, *Identifier:
+		p.errors = append(p.errors, "invalid bare expression")
 	}
 
-	// validate semantic constraints (e.g., null usage)
-	p.validate(expr, true, nil)
+	// consume remaining tokens and mark errors if any leftover meaningful tokens
+	for p.peekToken.Type != token.EOF {
+		p.nextToken()
+
+		if p.curToken.Type != token.EOF {
+			p.errors = append(p.errors, fmt.Sprintf("unexpected token %q", p.curToken.Literal))
+		}
+	}
 
 	return expr
 }
 
-func (p *parser) nextToken() { p.curToken = p.peekToken; p.peekToken = p.l.NextToken() }
-
-func (p *parser) expectPeek(t token.Type) bool {
-	if p.peekToken.Type == t {
-		p.nextToken()
-
-		return true
-	}
-
-	p.peekError(t)
-
-	return false
-}
-
-func (p *parser) peekPrecedence() int {
-	if pr, ok := precedences[p.peekToken.Type]; ok {
-		return pr
-	}
-
-	return lowest
-}
-
-func (p *parser) curPrecedence() int {
-	if pr, ok := precedences[p.curToken.Type]; ok {
-		return pr
-	}
-
-	return lowest
-}
-
-func (p *parser) peekError(t token.Type) {
-	p.errors = append(p.errors, fmt.Sprintf("expected next token to be %q, got %q instead", t, p.peekToken.Type))
-}
-
+//nolint:exhaustive,funlen,gocognit // refactor later
 func (p *parser) parseExpression(precedence int) Expression {
 	var leftExp Expression
 
-	//nolint:exhaustive // no need.
 	switch p.curToken.Type {
 	case token.Ident:
 		leftExp = &Identifier{Value: p.curToken.Literal}
 	case token.Int:
+		// bare int is invalid as an expression, record error but continue
 		leftExp = &IntegerLiteral{Value: p.curToken.Literal}
 	case token.String:
 		leftExp = &StringLiteral{Value: p.curToken.Literal}
 	case token.Null:
+		// bare null is invalid
 		leftExp = &Null{}
+
+		p.errors = append(p.errors, "null cannot be used as a standalone expression")
 	case token.Not:
+		// prefix not
 		p.nextToken()
 		right := p.parseExpression(prefix)
+		// Disallow 'not' applied to a bare value
+		switch right.(type) {
+		case *IntegerLiteral, *StringLiteral, *Null:
+			p.errors = append(p.errors, "not cannot be applied to a value")
+		case nil:
+			p.errors = append(p.errors, "missing expression after not")
+		}
+
 		leftExp = &NotExpr{Right: right}
 	case token.Lparen:
+		// consume '(' and parse subexpression
 		p.nextToken()
 
-		leftExp = p.parseExpression(lowest)
-		if !p.expectPeek(token.Rparen) {
-			return nil
+		inner := p.parseExpression(lowest)
+		p.expectPeek(token.Rparen)
+		// Disallow grouping a bare value as a full expression like (null)
+		switch inner.(type) {
+		case *IntegerLiteral, *StringLiteral, *Null:
+			p.errors = append(p.errors, "grouped value is not a valid expression")
 		}
+
+		leftExp = inner
+	case token.Illegal:
+		p.errors = append(p.errors, fmt.Sprintf("illegal token %q", p.curToken.Literal))
+
+		return nil
 	default:
-		p.errors = append(p.errors, fmt.Sprintf("no prefix parse function for %q found", p.curToken.Type))
+		p.errors = append(p.errors, fmt.Sprintf("no prefix parse function for %q", p.curToken.Literal))
 
 		return nil
 	}
 
+	// Infix parsing loop
 	for p.peekToken.Type != token.EOF && precedence < p.peekPrecedence() {
-		op := p.peekToken.Type
-		// Only logical and comparison operators are infix here
-		//nolint:exhaustive // no need to check all the keys.
-		switch op {
-		case token.And, token.Or, token.Eq, token.NotEq,
-			token.GreaterThan, token.GreaterThanOrEqual, token.LessThan, token.LessThanOrEqual:
-			p.nextToken() // advance to operator
-			prec := p.curPrecedence()
-			p.nextToken() // advance to the right expression's first token
-			right := p.parseExpression(prec)
-			leftExp = &FilterExpr{Left: leftExp, Operator: op, Right: right}
+		switch p.peekToken.Type {
+		case token.And:
+			p.nextToken() // move to 'and'
+			opPrec := p.curPrecedence()
+			p.nextToken() // move to right prefix
+			right := p.parseExpression(opPrec)
+			leftExp = &AndExpr{Left: leftExp, Right: right}
+		case token.Or:
+			p.nextToken() // move to 'or'
+			opPrec := p.curPrecedence()
+			p.nextToken()
+			right := p.parseExpression(opPrec)
+			leftExp = &OrExpr{Left: leftExp, Right: right}
+		case token.Eq, token.NotEq, token.GreaterThan, token.GreaterThanOrEqual, token.LessThan, token.LessThanOrEqual:
+			// comparisons bind tighter than and/or
+			p.nextToken() // move to operator
+			operator := p.curToken.Type
+
+			// left must be identifier
+			ident, ok := leftExp.(*Identifier)
+			if !ok {
+				p.errors = append(p.errors, "left side of comparison must be an identifier")
+			}
+
+			// parse right value
+			p.nextToken()
+			val := p.parseValue()
+
+			// validate null with comparison
+			if _, isNull := val.(*Null); isNull {
+				switch operator {
+				case token.GreaterThan, token.GreaterThanOrEqual, token.LessThan, token.LessThanOrEqual:
+					p.errors = append(p.errors, "null cannot be used with comparison operator")
+				}
+			}
+
+			if ident == nil {
+				// fabricate to proceed
+				ident = &Identifier{Value: ""}
+			}
+
+			leftExp = &FilterExpr{Left: *ident, Operator: FilterOperator(operator), Right: val}
 		default:
 			return leftExp
 		}
@@ -169,36 +185,71 @@ func (p *parser) parseExpression(precedence int) Expression {
 	return leftExp
 }
 
-func (p *parser) validate(expr Expression, isLeft bool, parentFilterExpression *FilterExpr) {
-	if expr == nil {
+//nolint:exhaustive // no need to check all the tokens.
+func (p *parser) parseValue() Value {
+	switch p.curToken.Type {
+	case token.Int:
+		return &IntegerLiteral{Value: p.curToken.Literal}
+	case token.String:
+		return &StringLiteral{Value: p.curToken.Literal}
+	case token.Null:
+		return &Null{}
+	case token.Ident:
+		p.errors = append(p.errors, "identifier cannot be used as value")
+
+		return nil
+	case token.Lparen:
+		// value cannot be a grouped expression (e.g., (not null)) per tests
+		p.nextToken()
+
+		inner := p.parseExpression(lowest)
+		p.expectPeek(token.Rparen)
+
+		p.errors = append(p.errors, "invalid value expression")
+		// try to convert to some value to continue
+		switch v := inner.(type) {
+		case *Identifier:
+			return v
+		case *IntegerLiteral:
+			return v
+		case *StringLiteral:
+			return v
+		case *Null:
+			return v
+		default:
+			return &Identifier{Value: ""}
+		}
+	default:
+		p.errors = append(p.errors, fmt.Sprintf("invalid value token %q", p.curToken.Literal))
+
+		return &Identifier{Value: ""}
+	}
+}
+
+func (p *parser) expectPeek(t token.Type) {
+	if p.peekToken.Type == t {
+		p.nextToken()
+
 		return
 	}
 
-	switch e := expr.(type) {
-	case *Null:
-		if isLeft {
-			p.errors = append(p.errors, "invalid use of null: only allowed as right side of 'eq' or 'ne'")
+	p.errors = append(
+		p.errors,
+		fmt.Sprintf("expected next token to be %q, got %q instead", string(t), p.peekToken.Literal))
+}
 
-			return
-		}
-
-		if parentFilterExpression == nil ||
-			parentFilterExpression.Operator != token.Eq &&
-				parentFilterExpression.Operator != token.NotEq {
-			p.errors = append(p.errors, "invalid use of null: only allowed as right side of 'eq' or 'ne'")
-		}
-	case *Identifier:
-		return
-	case *IntegerLiteral, *StringLiteral:
-		if isLeft {
-			p.errors = append(p.errors, "invalid use of literals: only allowed as right side")
-		}
-	case *NotExpr:
-		// `not null` (directly or via grouping) is invalid
-		p.validate(e.Right, false, nil)
-	case *FilterExpr:
-		// Left side can never be null
-		p.validate(e.Left, true, e)
-		p.validate(e.Right, false, e)
+func (p *parser) peekPrecedence() int {
+	if p, ok := precedences[p.peekToken.Type]; ok {
+		return p
 	}
+
+	return lowest
+}
+
+func (p *parser) curPrecedence() int {
+	if p, ok := precedences[p.curToken.Type]; ok {
+		return p
+	}
+
+	return lowest
 }
