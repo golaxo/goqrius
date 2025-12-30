@@ -3,9 +3,11 @@ version: "2"
 
 formatters:
   enable:
+    # keep-sorted start
     - gci
     - gofmt
     - gofumpt
+    # keep-sorted end
   settings:
     gci:
       sections:
@@ -23,6 +25,7 @@ formatters:
 linters:
   default: all
   disable:
+    # keep-sorted start
     - decorder # If applicable, to be checked in code reviews.
     - dupl # Too many false positives.
     - err113 # This leads to lots of unnecessary allocations and boilerplate.
@@ -46,8 +49,10 @@ linters:
     - varnamelen # If applicable, to be checked in a code review.
     - wsl # Deprecated, using wsl_v5
     - zerologlint # Not using zerolog.
+    # keep-sorted end
 
   settings:
+    # keep-sorted start
     cyclop:
       max-complexity: 30
       package-average: 10
@@ -148,6 +153,7 @@ linters:
       align: false
     usetesting:
       os-temp-dir: true
+    # keep-sorted end
 
   exclusions:
     presets:
@@ -156,10 +162,12 @@ linters:
       - std-error-handling
     rules:
       - linters:
+          # keep-sorted start
           - errcheck
           - funlen
           - goconst
           - gosec
+          # keep-sorted end
         path: _test\.go
 
 issues:
