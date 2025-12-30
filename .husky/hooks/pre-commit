@@ -1,5 +1,0 @@
-#!/bin/sh
-
-codespell .
-yamllint .
-markdownlint-cli2 ./**/*.md --fix
