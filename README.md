@@ -40,12 +40,12 @@ GoQrius provides a comprehensive set of logical operators for building complex f
 
 Imagine the following users
 
-| Id | Name   | Surname | Age  | Email                   |
-|----|--------|---------|------|-------------------------|
+| Id | Name   | Surname | Age  | Email                     |
+|----|--------|---------|------|---------------------------|
 | 1  | John   | Doe     | 20   | <john.doe@example.com>    |
-| 2  | Jane   | Doe     | 10   |                         |
+| 2  | Jane   | Doe     | 10   |                           |
 | 3  | Alice  | Smith   | 66   | <alice.smith@example.com> |
-| 4  | Bob    | Smith   | 30   |                         |
+| 4  | Bob    | Smith   | 30   |                           |
 
 Then it's expected to filter the following conditions:
 
