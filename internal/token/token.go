@@ -12,7 +12,7 @@ const (
 	Ident  Type = "Ident"
 	Int    Type = "Int"
 	String Type = "String"
-	Null   Type = "null"
+	Null   Type = "Null"
 
 	/* Comparison Operators. */
 
@@ -44,5 +44,7 @@ type (
 		Type Type
 		// The actual value for the token.
 		Literal string
+		// Position of the token.
+		Position int
 	}
 )

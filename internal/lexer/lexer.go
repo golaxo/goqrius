@@ -31,9 +31,11 @@ func New(input string) *Lexer {
 func (l *Lexer) NextToken() token.Token {
 	l.skipWhitespace()
 
+	startPos := l.readPosition
+
 	ch, ok := l.peekChar()
 	if !ok {
-		return token.Token{Type: token.EOF, Literal: ""}
+		return token.Token{Type: token.EOF, Literal: "", Position: startPos}
 	}
 
 	// Single-character tokens (delimiters)
@@ -41,31 +43,31 @@ func (l *Lexer) NextToken() token.Token {
 	case '(':
 		l.readChar()
 
-		return token.Token{Type: token.Lparen, Literal: string(token.Lparen)}
+		return token.Token{Type: token.Lparen, Literal: string(token.Lparen), Position: startPos}
 	case ')':
 		l.readChar()
 
-		return token.Token{Type: token.Rparen, Literal: string(token.Rparen)}
+		return token.Token{Type: token.Rparen, Literal: string(token.Rparen), Position: startPos}
 	case '{':
 		l.readChar()
 
-		return token.Token{Type: token.Lbrace, Literal: string(token.Lbrace)}
+		return token.Token{Type: token.Lbrace, Literal: string(token.Lbrace), Position: startPos}
 	case '}':
 		l.readChar()
 
-		return token.Token{Type: token.Rbrace, Literal: string(token.Rbrace)}
+		return token.Token{Type: token.Rbrace, Literal: string(token.Rbrace), Position: startPos}
 	case '\'':
 		// String literal
 		str := l.readSingleQuoted()
 
-		return token.Token{Type: token.String, Literal: str}
+		return token.Token{Type: token.String, Literal: str, Position: startPos}
 	}
 
 	// Numbers
 	if isDigit(ch) {
 		num := l.readWhile(isDigit)
 
-		return token.Token{Type: token.Int, Literal: num}
+		return token.Token{Type: token.Int, Literal: num, Position: startPos}
 	}
 
 	// Identifiers and keywords (and, or, not, eq, ne, gt, ge, lt, le)
@@ -76,35 +78,35 @@ func (l *Lexer) NextToken() token.Token {
 		if offendingCh, isOk := l.peekChar(); isOk {
 			l.readChar()
 
-			return token.Token{Type: token.Illegal, Literal: string(offendingCh)}
+			return token.Token{Type: token.Illegal, Literal: string(offendingCh), Position: startPos}
 		}
 
-		return token.Token{Type: token.EOF, Literal: ""}
+		return token.Token{Type: token.EOF, Literal: "", Position: startPos}
 	}
 
 	switch ident {
 	case string(token.Null):
-		return newTokenFromType(token.Null)
+		return newTokenFromType(token.Null, startPos)
 	case string(token.And):
-		return newTokenFromType(token.And)
+		return newTokenFromType(token.And, startPos)
 	case string(token.Or):
-		return newTokenFromType(token.Or)
+		return newTokenFromType(token.Or, startPos)
 	case string(token.Not):
-		return newTokenFromType(token.Not)
+		return newTokenFromType(token.Not, startPos)
 	case string(token.Eq):
-		return newTokenFromType(token.Eq)
+		return newTokenFromType(token.Eq, startPos)
 	case string(token.NotEq):
-		return newTokenFromType(token.NotEq)
+		return newTokenFromType(token.NotEq, startPos)
 	case string(token.GreaterThan):
-		return newTokenFromType(token.GreaterThan)
+		return newTokenFromType(token.GreaterThan, startPos)
 	case string(token.GreaterThanOrEqual):
-		return newTokenFromType(token.GreaterThanOrEqual)
+		return newTokenFromType(token.GreaterThanOrEqual, startPos)
 	case string(token.LessThan):
-		return newTokenFromType(token.LessThan)
+		return newTokenFromType(token.LessThan, startPos)
 	case string(token.LessThanOrEqual):
-		return newTokenFromType(token.LessThanOrEqual)
+		return newTokenFromType(token.LessThanOrEqual, startPos)
 	default:
-		return token.Token{Type: token.Ident, Literal: ident}
+		return token.Token{Type: token.Ident, Literal: ident, Position: startPos}
 	}
 }
 
@@ -179,6 +181,6 @@ func isIdentChar(ch byte) bool {
 	return isIdentStart(ch) || isDigit(ch) || ch == '-' || ch == '.'
 }
 
-func newTokenFromType(t token.Type) token.Token {
-	return token.Token{Type: t, Literal: string(t)}
+func newTokenFromType(t token.Type, position int) token.Token {
+	return token.Token{Type: t, Literal: string(t), Position: position}
 }

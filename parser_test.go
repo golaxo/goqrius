@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/golaxo/goqrius/internal/lexer"
+	"github.com/golaxo/goqrius/internal/token"
 )
 
 func TestParseExpressions(t *testing.T) {
@@ -137,6 +138,65 @@ func TestParseErrors(t *testing.T) {
 
 			if len(p.Errors()) == 0 {
 				t.Fatalf("expected errors, got none for input: %q", input)
+			}
+		})
+	}
+}
+
+func TestParseErrorsPositions(t *testing.T) {
+	t.Parallel()
+
+	tests := map[string]struct {
+		input          string
+		expectedErrors []error
+	}{
+		"missing closing paren": {
+			input: "(name eq 'John'",
+			expectedErrors: []error{
+				UnexpectedTokenError{
+					Token: token.Token{
+						Type:     token.EOF,
+						Literal:  "",
+						Position: 15,
+					},
+					Message: "expected next token to be \")\", got \"\"",
+				},
+			},
+		},
+		"unknown operator": {
+			input: "name is null",
+			expectedErrors: []error{
+				UnexpectedTokenError{
+					Token: token.Token{
+						Type:     token.Ident,
+						Literal:  "is",
+						Position: 4,
+					},
+					Message: "expected next token to be an operator, got \"is\"",
+				},
+			},
+		},
+	}
+
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			p := newParser(lexer.New(tt.input))
+			_ = p.parse()
+
+			if len(p.Errors()) == 0 {
+				t.Fatalf("expected errors, got none")
+			}
+
+			if len(p.Errors()) != len(tt.expectedErrors) {
+				t.Fatalf("expected %d errors, got %d", len(tt.expectedErrors), len(p.Errors()))
+			}
+
+			for i, err := range p.Errors() {
+				if err.Error() != tt.expectedErrors[i].Error() {
+					t.Fatalf("expected error %v, got: %v", tt.expectedErrors[i], err)
+				}
 			}
 		})
 	}
