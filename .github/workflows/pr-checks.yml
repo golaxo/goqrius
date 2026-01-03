@@ -64,7 +64,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: DavidAnson/markdownlint-cli2-action@v22.0.0
+      - uses: DavidAnson/markdownlint-cli2-action@4c32f8967286e8627515a01830168da913bb93d8
         with:
           globs: '**/*.md'
   yamllint:
