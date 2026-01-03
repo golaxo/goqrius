@@ -49,14 +49,14 @@ Imagine the following users
 
 Then it's expected to filter the following conditions:
 
-| Filter                    | John(1) | Jane(2) | Alice(3) | Bob(4) |
-|---------------------------|:-------:|:-------:|:--------:|:------:|
-| `name eq 'John'`          |    ✅    |    ❌    |    ❌     |   ❌    |
-| `name ne 'John'`          |    ❌    |    ✅    |    ✅     |   ✅    |
-| `not name eq 'John'`      |    ❌    |    ✅    |    ✅     |   ✅    |
-| `age gt 18 and age lt 65` |    ✅    |    ❌    |    ❌     |   ✅    |
-| `age le 18 or age gt 65`  |    ❌    |    ✅    |    ✅     |   ❌    |
-| `email eq null`           |    ❌    |    ✅    |    ❌     |   ✅    |
+| Filter                    |      John(1)       |      Jane(2)       |      Alice(3)      |       Bob(4)       |
+|---------------------------|:------------------:|:------------------:|:------------------:|:------------------:|
+| `name eq 'John'`          | :white_check_mark: |        :x:         |        :x:         |        :x:         |
+| `name ne 'John'`          |        :x:         | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| `not name eq 'John'`      |        :x:         | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| `age gt 18 and age lt 65` | :white_check_mark: |        :x:         |        :x:         | :white_check_mark: |
+| `age le 18 or age gt 65`  |        :x:         | :white_check_mark: | :white_check_mark: |        :x:         |
+| `email eq null`           |        :x:         | :white_check_mark: |        :x:         | :white_check_mark: |
 
 ## 🔧 Implementations
 
