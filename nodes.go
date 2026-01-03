@@ -15,6 +15,15 @@ const (
 	LessThanOrEqual    FilterOperator = "le"
 )
 
+var (
+	_ LogicalOperator = new(AndExpr)
+	_ LogicalOperator = new(OrExpr)
+	_ LogicalOperator = new(NotExpr)
+	_ Value           = new(IntegerLiteral)
+	_ Value           = new(Null)
+	_ Value           = new(StringLiteral)
+)
+
 type (
 	Node interface {
 		String() string
@@ -25,6 +34,12 @@ type (
 		expressionNode()
 	}
 
+	// LogicalOperator is a marker interface to indicate that the node is a logical operator: and, or and not.
+	LogicalOperator interface {
+		logicalOperatorExpression()
+	}
+
+	// Value is a marker interface to indicate that the node is a value, e.g., null, 'John', 5, etc.
 	Value interface {
 		Expression
 		valueNode()
@@ -76,15 +91,18 @@ type (
 func (ae *AndExpr) String() string {
 	return fmt.Sprintf("(%s and %s)", ae.Left.String(), ae.Right.String())
 }
-func (ae *AndExpr) expressionNode() {}
+func (ae *AndExpr) expressionNode()            {}
+func (ae *AndExpr) logicalOperatorExpression() {}
 
 func (oe *OrExpr) String() string {
 	return fmt.Sprintf("(%s or %s)", oe.Left.String(), oe.Right.String())
 }
-func (oe *OrExpr) expressionNode() {}
+func (oe *OrExpr) expressionNode()            {}
+func (oe *OrExpr) logicalOperatorExpression() {}
 
-func (ne *NotExpr) String() string  { return fmt.Sprintf("(not %s)", ne.Right.String()) }
-func (ne *NotExpr) expressionNode() {}
+func (ne *NotExpr) String() string             { return fmt.Sprintf("(not %s)", ne.Right.String()) }
+func (ne *NotExpr) expressionNode()            {}
+func (ne *NotExpr) logicalOperatorExpression() {}
 
 func (ie *FilterExpr) String() string {
 	return fmt.Sprintf("(%s %s %s)", ie.Left.String(), string(ie.Operator), ie.Right.String())
@@ -93,7 +111,6 @@ func (ie *FilterExpr) expressionNode() {}
 
 func (i *Identifier) String() string  { return i.Value }
 func (i *Identifier) expressionNode() {}
-func (i *Identifier) valueNode()      {}
 
 func (il *IntegerLiteral) String() string  { return il.Value }
 func (il *IntegerLiteral) expressionNode() {}

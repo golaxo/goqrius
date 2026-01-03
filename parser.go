@@ -62,29 +62,22 @@ func (p *parser) parse() Expression {
 
 	expr := p.parseExpression(lowest)
 
-	// If we have left over tokens, it might be a missing operator
-	if p.peekToken.Type != token.EOF {
-		if _, isIdent := expr.(*Identifier); isIdent {
-			p.errors = append(p.errors, UnexpectedTokenError{
-				Token:   p.peekToken,
-				Message: fmt.Sprintf("expected next token to be an operator, got %q", p.peekToken.Literal),
-			})
-
-			return expr
-		}
-	}
-
-	// if expression is a bare value or identifier, it's invalid
-	switch expr.(type) {
-	case *IntegerLiteral, *StringLiteral, *Null, *Identifier:
-		p.errors = append(p.errors, UnexpectedTokenError{
-			Token:   p.curToken,
-			Message: "invalid bare expression",
-		})
-	}
-
 	// consume remaining tokens and mark errors if any leftover meaningful tokens
 	for p.peekToken.Type != token.EOF {
+		{
+			_, isValue := expr.(Value)
+
+			_, isIdentifier := expr.(*Identifier)
+			if isValue || isIdentifier {
+				p.errors = append(p.errors, UnexpectedTokenError{
+					Token:   p.peekToken,
+					Message: fmt.Sprintf("expected next token to be an operator, got %q", p.peekToken.Literal),
+				})
+
+				return expr
+			}
+		}
+
 		p.nextToken()
 
 		if p.curToken.Type != token.EOF {
@@ -257,7 +250,7 @@ func (p *parser) parseValue() Value {
 		// try to convert to some value to continue
 		switch v := inner.(type) {
 		case *Identifier:
-			return v
+			return nil
 		case *IntegerLiteral:
 			return v
 		case *StringLiteral:
@@ -265,7 +258,7 @@ func (p *parser) parseValue() Value {
 		case *Null:
 			return v
 		default:
-			return &Identifier{Value: ""}
+			return nil
 		}
 	default:
 		p.errors = append(p.errors, UnexpectedTokenError{
@@ -273,7 +266,7 @@ func (p *parser) parseValue() Value {
 			Message: fmt.Sprintf("invalid value token %q", p.curToken.Literal),
 		})
 
-		return &Identifier{Value: ""}
+		return nil
 	}
 }
 
