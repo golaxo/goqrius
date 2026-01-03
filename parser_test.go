@@ -170,7 +170,7 @@ func TestParseErrorsPositions(t *testing.T) {
 					Token: token.Token{
 						Type:     token.Ident,
 						Literal:  "is",
-						Position: 4,
+						Position: 5,
 					},
 					Message: "expected next token to be an operator, got \"is\"",
 				},

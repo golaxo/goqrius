@@ -62,6 +62,18 @@ func (p *parser) parse() Expression {
 
 	expr := p.parseExpression(lowest)
 
+	// If we have left over tokens, it might be a missing operator
+	if p.peekToken.Type != token.EOF {
+		if _, isIdent := expr.(*Identifier); isIdent {
+			p.errors = append(p.errors, UnexpectedTokenError{
+				Token:   p.peekToken,
+				Message: fmt.Sprintf("expected next token to be an operator, got %q", p.peekToken.Literal),
+			})
+
+			return expr
+		}
+	}
+
 	// if expression is a bare value or identifier, it's invalid
 	switch expr.(type) {
 	case *IntegerLiteral, *StringLiteral, *Null, *Identifier:
