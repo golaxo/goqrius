@@ -44,5 +44,7 @@ type (
 		Type Type
 		// The actual value for the token.
 		Literal string
+		// Position of the token.
+		Position int
 	}
 )
