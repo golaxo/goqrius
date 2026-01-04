@@ -65,6 +65,15 @@ func (p *parser) parse() Expression {
 		return nil
 	}
 
+	if p.peekToken.Type == token.Illegal {
+		p.errors = append(p.errors, UnexpectedTokenError{
+			Token:   p.peekToken,
+			Message: fmt.Sprintf("illegal token %q", p.peekToken.Literal),
+		})
+
+		return expr
+	}
+
 	if _, isValue := expr.(Value); isValue && p.peekToken.Type == token.EOF {
 		p.errors = append(p.errors, UnexpectedTokenError{
 			Token:   p.curToken,

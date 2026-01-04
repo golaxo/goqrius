@@ -167,6 +167,7 @@ linters:
           - funlen
           - goconst
           - gosec
+          - maintidx
           # keep-sorted end
         path: _test\.go
 
