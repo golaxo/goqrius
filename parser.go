@@ -61,6 +61,18 @@ func (p *parser) parse() Expression {
 	}
 
 	expr := p.parseExpression(lowest)
+	if expr == nil {
+		return nil
+	}
+
+	if _, isValue := expr.(Value); isValue && p.peekToken.Type == token.EOF {
+		p.errors = append(p.errors, UnexpectedTokenError{
+			Token:   p.curToken,
+			Message: fmt.Sprintf("'%s' can not be used as a standalone expression", p.curToken.Literal),
+		})
+
+		return expr
+	}
 
 	// consume remaining tokens and mark errors if any leftover meaningful tokens
 	for p.peekToken.Type != token.EOF {
@@ -95,6 +107,8 @@ func (p *parser) parse() Expression {
 func (p *parser) parseExpression(precedence int) Expression {
 	var leftExp Expression
 
+	leftToken := p.curToken
+
 	switch p.curToken.Type {
 	case token.Ident:
 		leftExp = &Identifier{Value: p.curToken.Literal}
@@ -102,15 +116,12 @@ func (p *parser) parseExpression(precedence int) Expression {
 		// bare int is invalid as an expression, record error but continue
 		leftExp = &IntegerLiteral{Value: p.curToken.Literal}
 	case token.String:
+		// bare string is invalid as an expression, record error but continue
 		leftExp = &StringLiteral{Value: p.curToken.Literal}
 	case token.Null:
 		// bare null is invalid
 		leftExp = &Null{}
 
-		p.errors = append(p.errors, UnexpectedTokenError{
-			Token:   p.curToken,
-			Message: "null cannot be used as a standalone expression",
-		})
 	case token.Not:
 		// prefix not
 		p.nextToken()
@@ -120,7 +131,7 @@ func (p *parser) parseExpression(precedence int) Expression {
 		case *IntegerLiteral, *StringLiteral, *Null:
 			p.errors = append(p.errors, UnexpectedTokenError{
 				Token:   p.curToken,
-				Message: "not cannot be applied to a value",
+				Message: "'not' can not be applied to a value",
 			})
 		case nil:
 			p.errors = append(p.errors, UnexpectedTokenError{
@@ -143,6 +154,8 @@ func (p *parser) parseExpression(precedence int) Expression {
 				Token:   p.curToken,
 				Message: "grouped value is not a valid expression",
 			})
+
+			return nil
 		}
 
 		leftExp = inner
@@ -168,7 +181,7 @@ func (p *parser) parseExpression(precedence int) Expression {
 		case token.And:
 			p.nextToken() // move to 'and'
 			opPrec := p.curPrecedence()
-			p.nextToken() // move to right prefix
+			p.nextToken() // move to the right prefix
 			right := p.parseExpression(opPrec)
 			leftExp = &AndExpr{Left: leftExp, Right: right}
 		case token.Or:
@@ -186,7 +199,7 @@ func (p *parser) parseExpression(precedence int) Expression {
 			ident, ok := leftExp.(*Identifier)
 			if !ok {
 				p.errors = append(p.errors, UnexpectedTokenError{
-					Token:   p.curToken,
+					Token:   leftToken,
 					Message: "left side of comparison must be an identifier",
 				})
 			}
@@ -201,7 +214,7 @@ func (p *parser) parseExpression(precedence int) Expression {
 				case token.GreaterThan, token.GreaterThanOrEqual, token.LessThan, token.LessThanOrEqual:
 					p.errors = append(p.errors, UnexpectedTokenError{
 						Token:   p.curToken,
-						Message: "null cannot be used with comparison operator",
+						Message: "'null' can not be used with comparison operator",
 					})
 				}
 			}
@@ -232,34 +245,33 @@ func (p *parser) parseValue() Value {
 	case token.Ident:
 		p.errors = append(p.errors, UnexpectedTokenError{
 			Token:   p.curToken,
-			Message: "identifier cannot be used as value",
+			Message: "identifier can not be used as value",
 		})
 
 		return nil
 	case token.Lparen:
 		// value cannot be a grouped expression (e.g., (not null)) per tests
 		p.nextToken()
+		startToken := p.curToken
 
 		inner := p.parseExpression(lowest)
 		p.expectPeek(token.Rparen)
 
-		p.errors = append(p.errors, UnexpectedTokenError{
-			Token:   p.curToken,
-			Message: "invalid value expression",
-		})
-		// try to convert to some value to continue
-		switch v := inner.(type) {
-		case *Identifier:
-			return nil
-		case *IntegerLiteral:
+		if v, ok := inner.(Value); ok {
+			p.errors = append(p.errors, UnexpectedTokenError{
+				Token:   p.curToken,
+				Message: "invalid value expression",
+			})
+
 			return v
-		case *StringLiteral:
-			return v
-		case *Null:
-			return v
-		default:
-			return nil
 		}
+
+		p.errors = append(p.errors, UnexpectedTokenError{
+			Token:   startToken,
+			Message: "right side of comparison must be a value",
+		})
+
+		return nil
 	default:
 		p.errors = append(p.errors, UnexpectedTokenError{
 			Token:   p.curToken,

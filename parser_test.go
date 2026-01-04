@@ -109,47 +109,23 @@ func TestMustParseEmptyInput(t *testing.T) {
 func TestParseErrors(t *testing.T) {
 	t.Parallel()
 
-	tests := map[string]string{
-		"identifier as value":        "name eq value",
-		"missing closing paren":      "(name eq 'John'",
-		"unknown prefix":             "@ eq 1",
-		"unknown operator is":        "name is null",
-		"unknown operator not":       "name not null",
-		"int as left side":           "1 gt 2",
-		"string in left side":        "'name' eq 'John'",
-		"not null is invalid":        "not null",
-		"bare null is invalid":       "null",
-		"paren bare null is invalid": "(null)",
-		"null on left is invalid":    "null eq name",
-		"gt null is invalid":         "name gt null",
-		"ge null is invalid":         "name ge null",
-		"lt null is invalid":         "name lt null",
-		"le null is invalid":         "name le null",
-		"eq not null is invalid":     "name eq not null",
-		"eq (not null) is invalid":   "name eq (not null)",
-	}
-
-	for name, input := range tests {
-		t.Run(name, func(t *testing.T) {
-			t.Parallel()
-
-			p := newParser(lexer.New(input))
-			_ = p.parse()
-
-			if len(p.Errors()) == 0 {
-				t.Fatalf("expected errors, got none for input: %q", input)
-			}
-		})
-	}
-}
-
-func TestParseErrorsPositions(t *testing.T) {
-	t.Parallel()
-
 	tests := map[string]struct {
 		input          string
 		expectedErrors []error
 	}{
+		"identifier as value": {
+			input: "name eq value",
+			expectedErrors: []error{
+				UnexpectedTokenError{
+					Token: token.Token{
+						Type:     token.Ident,
+						Literal:  "value",
+						Position: 8,
+					},
+					Message: "identifier can not be used as value",
+				},
+			},
+		},
 		"missing closing paren": {
 			input: "(name eq 'John'",
 			expectedErrors: []error{
@@ -163,7 +139,20 @@ func TestParseErrorsPositions(t *testing.T) {
 				},
 			},
 		},
-		"unknown operator": {
+		"unknown prefix": {
+			input: "@ eq 1",
+			expectedErrors: []error{
+				UnexpectedTokenError{
+					Token: token.Token{
+						Type:     token.Illegal,
+						Literal:  "@",
+						Position: 0,
+					},
+					Message: "illegal token \"@\"",
+				},
+			},
+		},
+		"unknown operator is": {
 			input: "name is null",
 			expectedErrors: []error{
 				UnexpectedTokenError{
@@ -173,6 +162,199 @@ func TestParseErrorsPositions(t *testing.T) {
 						Position: 5,
 					},
 					Message: "expected next token to be an operator, got \"is\"",
+				},
+			},
+		},
+		"unknown operator not": {
+			input: "name not null",
+			expectedErrors: []error{
+				UnexpectedTokenError{
+					Token: token.Token{
+						Type:     token.Not,
+						Literal:  "not",
+						Position: 5,
+					},
+					Message: "expected next token to be an operator, got \"not\"",
+				},
+			},
+		},
+		"int as left side": {
+			input: "1 gt 2",
+			expectedErrors: []error{
+				UnexpectedTokenError{
+					Token: token.Token{
+						Type:     token.Int,
+						Literal:  "1",
+						Position: 0,
+					},
+					Message: "left side of comparison must be an identifier",
+				},
+			},
+		},
+		"string in left side": {
+			input: "'name' eq 'John'",
+			expectedErrors: []error{
+				UnexpectedTokenError{
+					Token: token.Token{
+						Type:     token.String,
+						Literal:  "name",
+						Position: 0,
+					},
+					Message: "left side of comparison must be an identifier",
+				},
+			},
+		},
+		"not null is invalid": {
+			input: "not null",
+			expectedErrors: []error{
+				UnexpectedTokenError{
+					Token: token.Token{
+						Type:     token.Null,
+						Literal:  "null",
+						Position: 4,
+					},
+					Message: "'not' can not be applied to a value",
+				},
+			},
+		},
+		"bare null is invalid": {
+			input: "null",
+			expectedErrors: []error{
+				UnexpectedTokenError{
+					Token: token.Token{
+						Type:     token.Null,
+						Literal:  "null",
+						Position: 0,
+					},
+					Message: "'null' can not be used as a standalone expression",
+				},
+			},
+		},
+		"paren bare null is invalid": {
+			input: "(null)",
+			expectedErrors: []error{
+				UnexpectedTokenError{
+					Token: token.Token{
+						Type:     token.Rparen,
+						Literal:  ")",
+						Position: 5,
+					},
+					Message: "grouped value is not a valid expression",
+				},
+			},
+		},
+		"null on left is invalid": {
+			input: "null eq name",
+			expectedErrors: []error{
+				UnexpectedTokenError{
+					Token: token.Token{
+						Type:     token.Null,
+						Literal:  "null",
+						Position: 0,
+					},
+					Message: "left side of comparison must be an identifier",
+				},
+				UnexpectedTokenError{
+					Token: token.Token{
+						Type:     token.Ident,
+						Literal:  "name",
+						Position: 8,
+					},
+					Message: "identifier can not be used as value",
+				},
+			},
+		},
+		"gt null is invalid": {
+			input: "name gt null",
+			expectedErrors: []error{
+				UnexpectedTokenError{
+					Token: token.Token{
+						Type:     token.Null,
+						Literal:  "null",
+						Position: 8,
+					},
+					Message: "'null' can not be used with comparison operator",
+				},
+			},
+		},
+		"ge null is invalid": {
+			input: "name ge null",
+			expectedErrors: []error{
+				UnexpectedTokenError{
+					Token: token.Token{
+						Type:     token.Null,
+						Literal:  "null",
+						Position: 8,
+					},
+					Message: "'null' can not be used with comparison operator",
+				},
+			},
+		},
+		"lt null is invalid": {
+			input: "name lt null",
+			expectedErrors: []error{
+				UnexpectedTokenError{
+					Token: token.Token{
+						Type:     token.Null,
+						Literal:  "null",
+						Position: 8,
+					},
+					Message: "'null' can not be used with comparison operator",
+				},
+			},
+		},
+		"le null is invalid": {
+			input: "name le null",
+			expectedErrors: []error{
+				UnexpectedTokenError{
+					Token: token.Token{
+						Type:     token.Null,
+						Literal:  "null",
+						Position: 8,
+					},
+					Message: "'null' can not be used with comparison operator",
+				},
+			},
+		},
+		"eq not null is invalid": {
+			input: "name eq not null",
+			expectedErrors: []error{
+				UnexpectedTokenError{
+					Token: token.Token{
+						Type:     token.Not,
+						Literal:  "not",
+						Position: 8,
+					},
+					Message: "invalid value token \"not\"",
+				},
+				UnexpectedTokenError{
+					Token: token.Token{
+						Type:     token.Null,
+						Literal:  "null",
+						Position: 12,
+					},
+					Message: "unexpected token \"null\"",
+				},
+			},
+		},
+		"eq (not null) is invalid": {
+			input: "name eq (not null)",
+			expectedErrors: []error{
+				UnexpectedTokenError{
+					Token: token.Token{
+						Type:     token.Not,
+						Literal:  "not",
+						Position: 13,
+					},
+					Message: "'not' can not be applied to a value",
+				},
+				UnexpectedTokenError{
+					Token: token.Token{
+						Type:     token.Not,
+						Literal:  "not",
+						Position: 9,
+					},
+					Message: "right side of comparison must be a value",
 				},
 			},
 		},
@@ -195,7 +377,7 @@ func TestParseErrorsPositions(t *testing.T) {
 
 			for i, err := range p.Errors() {
 				if err.Error() != tt.expectedErrors[i].Error() {
-					t.Fatalf("expected error %v, got: %v", tt.expectedErrors[i], err)
+					t.Fatalf("expected error at [%d]: %v, got: %v", i, tt.expectedErrors[i], err)
 				}
 			}
 		})
