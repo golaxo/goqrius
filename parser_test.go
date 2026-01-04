@@ -62,6 +62,10 @@ func TestParseExpressions(t *testing.T) {
 			input:          "name eq null or not age ge 18",
 			expectedString: "((name eq null) or (not (age ge 18)))",
 		},
+		"identifier mixing characters and number": {
+			input:          "nam3 eq 'John",
+			expectedString: "(nam3 eq 'John')",
+		},
 	}
 
 	for name, tt := range tests {
