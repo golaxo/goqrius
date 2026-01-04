@@ -12,6 +12,11 @@ var (
 	_ error = new(UnexpectedTokenError)
 )
 
+const (
+	LeftSideMustBeIdentifier       = "left side of comparison must be an identifier"
+	NullCannotBeUsedWithComparison = "'null' can not be used with comparison operator"
+)
+
 type ParseError struct {
 	errors []error
 }

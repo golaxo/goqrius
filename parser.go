@@ -195,12 +195,12 @@ func (p *parser) parseExpression(precedence int) Expression {
 			p.nextToken() // move to operator
 			operator := p.curToken.Type
 
-			// left must be identifier
+			// left must be an [Identifier]
 			ident, ok := leftExp.(*Identifier)
 			if !ok {
 				p.errors = append(p.errors, UnexpectedTokenError{
 					Token:   leftToken,
-					Message: "left side of comparison must be an identifier",
+					Message: LeftSideMustBeIdentifier,
 				})
 			}
 
@@ -214,7 +214,7 @@ func (p *parser) parseExpression(precedence int) Expression {
 				case token.GreaterThan, token.GreaterThanOrEqual, token.LessThan, token.LessThanOrEqual:
 					p.errors = append(p.errors, UnexpectedTokenError{
 						Token:   p.curToken,
-						Message: "'null' can not be used with comparison operator",
+						Message: NullCannotBeUsedWithComparison,
 					})
 				}
 			}
