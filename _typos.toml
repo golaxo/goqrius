@@ -1,0 +1,4 @@
+[files]
+extend-exclude = [
+    "go.mod", "**/*_test.go"
+]
