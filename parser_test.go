@@ -110,11 +110,11 @@ func TestParseErrors(t *testing.T) {
 	t.Parallel()
 
 	tests := map[string]struct {
-		input          string
+		description    string
 		expectedErrors []error
 	}{
-		"identifier as value": {
-			input: "name eq value",
+		"name eq value": {
+			description: "identifier as value",
 			expectedErrors: []error{
 				UnexpectedTokenError{
 					Token: token.Token{
@@ -126,8 +126,8 @@ func TestParseErrors(t *testing.T) {
 				},
 			},
 		},
-		"missing closing paren": {
-			input: "(name eq 'John'",
+		"(name eq 'John'": {
+			description: "missing closing paren",
 			expectedErrors: []error{
 				UnexpectedTokenError{
 					Token: token.Token{
@@ -139,8 +139,8 @@ func TestParseErrors(t *testing.T) {
 				},
 			},
 		},
-		"unknown prefix": {
-			input: "@ eq 1",
+		"@ eq 1": {
+			description: "illegal character",
 			expectedErrors: []error{
 				UnexpectedTokenError{
 					Token: token.Token{
@@ -152,8 +152,8 @@ func TestParseErrors(t *testing.T) {
 				},
 			},
 		},
-		"unknown operator is": {
-			input: "name is null",
+		"name is null": {
+			description: "unknown operator 'is'",
 			expectedErrors: []error{
 				UnexpectedTokenError{
 					Token: token.Token{
@@ -165,8 +165,8 @@ func TestParseErrors(t *testing.T) {
 				},
 			},
 		},
-		"unknown operator not": {
-			input: "name not null",
+		"name not null": {
+			description: "unknown operator not",
 			expectedErrors: []error{
 				UnexpectedTokenError{
 					Token: token.Token{
@@ -178,8 +178,8 @@ func TestParseErrors(t *testing.T) {
 				},
 			},
 		},
-		"int as left side": {
-			input: "1 gt 2",
+		"1 gt 2": {
+			description: "int as left side",
 			expectedErrors: []error{
 				UnexpectedTokenError{
 					Token: token.Token{
@@ -191,8 +191,8 @@ func TestParseErrors(t *testing.T) {
 				},
 			},
 		},
-		"string in left side": {
-			input: "'name' eq 'John'",
+		"'name' eq 'John'": {
+			description: "string in left side",
 			expectedErrors: []error{
 				UnexpectedTokenError{
 					Token: token.Token{
@@ -204,8 +204,8 @@ func TestParseErrors(t *testing.T) {
 				},
 			},
 		},
-		"not null is invalid": {
-			input: "not null",
+		"not null": {
+			description: "not null is invalid",
 			expectedErrors: []error{
 				UnexpectedTokenError{
 					Token: token.Token{
@@ -217,8 +217,8 @@ func TestParseErrors(t *testing.T) {
 				},
 			},
 		},
-		"bare null is invalid": {
-			input: "null",
+		"null": {
+			description: "bare null is invalid",
 			expectedErrors: []error{
 				UnexpectedTokenError{
 					Token: token.Token{
@@ -230,8 +230,8 @@ func TestParseErrors(t *testing.T) {
 				},
 			},
 		},
-		"paren bare null is invalid": {
-			input: "(null)",
+		"(null)": {
+			description: "paren bare null is invalid",
 			expectedErrors: []error{
 				UnexpectedTokenError{
 					Token: token.Token{
@@ -243,8 +243,8 @@ func TestParseErrors(t *testing.T) {
 				},
 			},
 		},
-		"null on left is invalid": {
-			input: "null eq name",
+		"null eq name": {
+			description: "null on left is invalid",
 			expectedErrors: []error{
 				UnexpectedTokenError{
 					Token: token.Token{
@@ -264,8 +264,8 @@ func TestParseErrors(t *testing.T) {
 				},
 			},
 		},
-		"gt null is invalid": {
-			input: "name gt null",
+		"name gt null": {
+			description: "gt null is invalid",
 			expectedErrors: []error{
 				UnexpectedTokenError{
 					Token: token.Token{
@@ -277,8 +277,8 @@ func TestParseErrors(t *testing.T) {
 				},
 			},
 		},
-		"ge null is invalid": {
-			input: "name ge null",
+		"name ge null": {
+			description: "ge null is invalid",
 			expectedErrors: []error{
 				UnexpectedTokenError{
 					Token: token.Token{
@@ -290,8 +290,8 @@ func TestParseErrors(t *testing.T) {
 				},
 			},
 		},
-		"lt null is invalid": {
-			input: "name lt null",
+		"name lt null": {
+			description: "lt null is invalid",
 			expectedErrors: []error{
 				UnexpectedTokenError{
 					Token: token.Token{
@@ -303,8 +303,8 @@ func TestParseErrors(t *testing.T) {
 				},
 			},
 		},
-		"le null is invalid": {
-			input: "name le null",
+		"name le null": {
+			description: "le null is invalid",
 			expectedErrors: []error{
 				UnexpectedTokenError{
 					Token: token.Token{
@@ -316,8 +316,8 @@ func TestParseErrors(t *testing.T) {
 				},
 			},
 		},
-		"eq not null is invalid": {
-			input: "name eq not null",
+		"name eq not null": {
+			description: "eq not null is invalid",
 			expectedErrors: []error{
 				UnexpectedTokenError{
 					Token: token.Token{
@@ -337,8 +337,8 @@ func TestParseErrors(t *testing.T) {
 				},
 			},
 		},
-		"eq (not null) is invalid": {
-			input: "name eq (not null)",
+		"name eq (not null)": {
+			description: "eq (not null) is invalid",
 			expectedErrors: []error{
 				UnexpectedTokenError{
 					Token: token.Token{
@@ -358,13 +358,26 @@ func TestParseErrors(t *testing.T) {
 				},
 			},
 		},
+		"n@me eq 'John'": {
+			description: "illegal character in identifier",
+			expectedErrors: []error{
+				UnexpectedTokenError{
+					Token: token.Token{
+						Type:     token.Illegal,
+						Literal:  "@",
+						Position: 1,
+					},
+					Message: "illegal token \"@\"",
+				},
+			},
+		},
 	}
 
-	for name, tt := range tests {
-		t.Run(name, func(t *testing.T) {
+	for input, tt := range tests {
+		t.Run(input, func(t *testing.T) {
 			t.Parallel()
 
-			p := newParser(lexer.New(tt.input))
+			p := newParser(lexer.New(input))
 			_ = p.parse()
 
 			if len(p.Errors()) == 0 {
