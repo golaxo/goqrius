@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.6](https://github.com/golaxo/goqrius/compare/v0.0.5...v0.0.6) (2026-01-04)
+
+
+### Bug Fixes
+
+* adding position to tokens ([#37](https://github.com/golaxo/goqrius/issues/37)) ([8d86775](https://github.com/golaxo/goqrius/commit/8d867752fa1b797d670d15282a7e8d30f12ebb77))
+
 ## [0.0.5](https://github.com/golaxo/goqrius/compare/v0.0.4...v0.0.5) (2025-12-14)
 
 
