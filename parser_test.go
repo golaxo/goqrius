@@ -371,6 +371,19 @@ func TestParseErrors(t *testing.T) {
 				},
 			},
 		},
+		"name @q 'John'": {
+			description: "illegal character in operator",
+			expectedErrors: []error{
+				UnexpectedTokenError{
+					Token: token.Token{
+						Type:     token.Illegal,
+						Literal:  "@",
+						Position: 5,
+					},
+					Message: "illegal token \"@\"",
+				},
+			},
+		},
 	}
 
 	for input, tt := range tests {
