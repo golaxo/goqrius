@@ -70,6 +70,7 @@ func (p *parser) parse() Expression {
 			Token:   p.peekToken,
 			Message: fmt.Sprintf("illegal token %q", p.peekToken.Literal),
 		})
+
 		return expr
 	}
 
@@ -89,7 +90,6 @@ func (p *parser) parse() Expression {
 
 			_, isIdentifier := expr.(*Identifier)
 			if isValue || isIdentifier {
-
 				p.errors = append(p.errors, UnexpectedTokenError{
 					Token:   p.peekToken,
 					Message: fmt.Sprintf("expected next token to be an operator, got %q", p.peekToken.Literal),
