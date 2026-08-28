@@ -20,7 +20,9 @@ formatters:
         - pattern: "interface{}"
           replacement: "any"
     gofumpt:
-      extra-rules: true
+      extra:
+        group-params: true
+        clothe-returns: true
 
 linters:
   default: all
@@ -31,6 +33,7 @@ linters:
     - err113 # This leads to lots of unnecessary allocations and boilerplate.
     - errchkjson # No json.
     - exhaustruct # If applicable, to be checked in code reviews.
+    - exhaustruct_v5 # If applicable, to be checked in code reviews.
     - forcetypeassert # Used in a different linter
     - ginkgolinter # Related to Ginkgo.
     - goheader # No need of copyright headers.
@@ -53,6 +56,13 @@ linters:
 
   settings:
     # keep-sorted start
+    custom:
+      testcomments:
+        type: module
+        description: lint that follows standards described in TestComments.
+        settings:
+          table-driven-format:
+            type: map
     cyclop:
       max-complexity: 30
       package-average: 10

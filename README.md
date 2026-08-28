@@ -3,7 +3,6 @@
 [![version](https://img.shields.io/github/v/release/golaxo/goqrius)](https://img.shields.io/github/v/release/golaxo/goqrius)
 [![CI](https://github.com/golaxo/goqrius/actions/workflows/ci.yml/badge.svg)](https://github.com/golaxo/goqrius/actions/workflows/ci.yml)
 [![PR checks](https://github.com/golaxo/goqrius/actions/workflows/pr-checks.yml/badge.svg)](https://github.com/golaxo/goqrius/actions/workflows/pr-checks.yml)
-[![Go Report Card](https://goreportcard.com/badge/github.com/golaxo/goqrius)](https://goreportcard.com/report/github.com/golaxo/goqrius)
 
 > [!WARNING]
 > GoQrius is under heavy development.
