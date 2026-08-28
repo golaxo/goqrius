@@ -16,8 +16,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        go: [oldstable, stable]
-        os: [ubuntu-latest, macos-latest]
+        go: ["oldstable", "stable", "1.25", "1.24"]
+        os: ["ubuntu-latest", "macos-latest"]
     permissions:
       contents: read
     steps:
