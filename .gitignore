@@ -21,6 +21,8 @@
 go.work
 go.work.sum
 
+custom-gcl
+
 # env file
 .env
 

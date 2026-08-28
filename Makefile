@@ -19,6 +19,7 @@ test: ## Run unit tests, alias: t
 .PHONY: t test
 
 lint:
-	golangci-lint run --fix ./...
+	golangci-lint custom -vv
+	./custom-gcl run --fix ./...
 	codespell .
 	markdownlint-cli2 --fix ./*/**.md

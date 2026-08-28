@@ -1,3 +1,4 @@
+// Package lexer contain the lexer logic to parse the string to tokens.
 package lexer
 
 import (
