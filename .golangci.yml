@@ -114,6 +114,11 @@ linters:
           paramsOnly: false
         underef:
           skipRecvDeref: false
+    godoclint:
+      default: all
+      options:
+        max-len:
+          length: 100
     godox:
       keywords:
         - FIXME
@@ -176,6 +181,7 @@ linters:
           - errcheck
           - funlen
           - goconst
+          - godoclint
           - gosec
           - maintidx
           # keep-sorted end

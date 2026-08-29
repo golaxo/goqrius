@@ -4,15 +4,22 @@ import (
 	"fmt"
 )
 
+// FilterOperator is the type of a filter operator.
 type FilterOperator string
 
 const (
-	Eq                 FilterOperator = "eq"
-	NotEq              FilterOperator = "ne"
-	GreaterThan        FilterOperator = "gt"
+	// Eq is the equality operator.
+	Eq FilterOperator = "eq"
+	// NotEq is the inequality operator.
+	NotEq FilterOperator = "ne"
+	// GreaterThan is the greater than operator.
+	GreaterThan FilterOperator = "gt"
+	// GreaterThanOrEqual is the greater than or equal operator.
 	GreaterThanOrEqual FilterOperator = "ge"
-	LessThan           FilterOperator = "lt"
-	LessThanOrEqual    FilterOperator = "le"
+	// LessThan is the less than operator.
+	LessThan FilterOperator = "lt"
+	// LessThanOrEqual is the less than or equal operator.
+	LessThanOrEqual FilterOperator = "le"
 )
 
 var (
@@ -25,16 +32,19 @@ var (
 )
 
 type (
+	// Node is a marker interface to group tokens.
 	Node interface {
 		String() string
 	}
 
+	// Expression is a marker interface to indicate that the node is an expression.
 	Expression interface {
 		Node
 		expressionNode()
 	}
 
-	// LogicalOperator is a marker interface to indicate that the node is a logical operator: and, or and not.
+	// LogicalOperator is a marker interface to indicate that the node is a logical operator:
+	// and, or and not.
 	LogicalOperator interface {
 		logicalOperatorExpression()
 	}
@@ -88,38 +98,46 @@ type (
 	}
 )
 
+// String representation of the node.
 func (ae *AndExpr) String() string {
 	return fmt.Sprintf("(%s and %s)", ae.Left.String(), ae.Right.String())
 }
 func (ae *AndExpr) expressionNode()            {}
 func (ae *AndExpr) logicalOperatorExpression() {}
 
+// String representation of the node.
 func (oe *OrExpr) String() string {
 	return fmt.Sprintf("(%s or %s)", oe.Left.String(), oe.Right.String())
 }
 func (oe *OrExpr) expressionNode()            {}
 func (oe *OrExpr) logicalOperatorExpression() {}
 
+// String representation of the node.
 func (ne *NotExpr) String() string             { return fmt.Sprintf("(not %s)", ne.Right.String()) }
 func (ne *NotExpr) expressionNode()            {}
 func (ne *NotExpr) logicalOperatorExpression() {}
 
+// String representation of the node.
 func (ie *FilterExpr) String() string {
 	return fmt.Sprintf("(%s %s %s)", ie.Left.String(), string(ie.Operator), ie.Right.String())
 }
 func (ie *FilterExpr) expressionNode() {}
 
+// String representation of the node.
 func (i *Identifier) String() string  { return i.Value }
 func (i *Identifier) expressionNode() {}
 
+// String representation of the node.
 func (il *IntegerLiteral) String() string  { return il.Value }
 func (il *IntegerLiteral) expressionNode() {}
 func (il *IntegerLiteral) valueNode()      {}
 
+// String representation of the node.
 func (n *Null) String() string  { return "null" }
 func (n *Null) expressionNode() {}
 func (n *Null) valueNode()      {}
 
+// String representation of the node.
 func (sl *StringLiteral) String() string  { return fmt.Sprintf("'%s'", sl.Value) }
 func (sl *StringLiteral) expressionNode() {}
 func (sl *StringLiteral) valueNode()      {}

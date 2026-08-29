@@ -47,8 +47,6 @@ func newParser(l *lexer.Lexer) *parser {
 	return p
 }
 
-func (p *parser) Errors() []error { return p.errors }
-
 func (p *parser) nextToken() {
 	p.curToken = p.peekToken
 	p.peekToken = p.l.NextToken()
