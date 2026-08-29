@@ -9,33 +9,51 @@ const (
 
 	/* Identifier + Literals. */
 
-	Ident  Type = "Ident"
-	Int    Type = "Int"
+	// Ident is the type of identifiers.
+	Ident Type = "Ident"
+	// Int is the type of integer literals.
+	Int Type = "Int"
+	// String is the type of string literals.
 	String Type = "String"
-	Null   Type = "null"
+	// Null is the type of null literals.
+	Null Type = "null"
 
 	/* Comparison Operators. */
 
-	Eq                 Type = "eq"
-	NotEq              Type = "ne"
-	GreaterThan        Type = "gt"
+	// Eq is the type of equality operator.
+	Eq Type = "eq"
+	// NotEq is the type of inequality operator.
+	NotEq Type = "ne"
+	// GreaterThan is the type of greater than operator.
+	GreaterThan Type = "gt"
+	// GreaterThanOrEqual is the type of greater than or equal operator.
 	GreaterThanOrEqual Type = "ge"
-	LessThan           Type = "lt"
-	LessThanOrEqual    Type = "le"
+	// LessThan is the type of less than operator.
+	LessThan Type = "lt"
+	// LessThanOrEqual is the type of less than or equal operator.
+	LessThanOrEqual Type = "le"
 
 	/* Logical Operators. */
 
+	// And is the type of logical and operator.
 	And Type = "and"
-	Or  Type = "or"
+	// Or is the type of logical or operator.
+	Or Type = "or"
+	// Not is the type of logical not operator.
 	Not Type = "not"
 
+	// Lparen is the type of left parenthesis.
 	Lparen Type = "("
+	// Rparen is the type of right parenthesis.
 	Rparen Type = ")"
+	// Lbrace is the type of left brace.
 	Lbrace Type = "{"
+	// Rbrace is the type of right brace.
 	Rbrace Type = "}"
 )
 
 type (
+	// Type is the type of a token.
 	Type string
 
 	// Token holds the actual type and its value.

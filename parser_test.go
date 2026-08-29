@@ -397,15 +397,15 @@ func TestParseErrors(t *testing.T) {
 			p := newParser(lexer.New(input))
 			_ = p.parse()
 
-			if len(p.Errors()) == 0 {
+			if len(p.errors) == 0 {
 				t.Fatalf("expected errors, got none")
 			}
 
-			if len(p.Errors()) != len(tt.expectedErrors) {
-				t.Fatalf("expected %d errors, got %d", len(tt.expectedErrors), len(p.Errors()))
+			if len(p.errors) != len(tt.expectedErrors) {
+				t.Fatalf("expected %d errors, got %d", len(tt.expectedErrors), len(p.errors))
 			}
 
-			for i, err := range p.Errors() {
+			for i, err := range p.errors {
 				if err.Error() != tt.expectedErrors[i].Error() {
 					t.Fatalf("expected error at [%d]: %v, got: %v", i, tt.expectedErrors[i], err)
 				}

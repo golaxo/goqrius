@@ -17,13 +17,15 @@ func Parse(input string) (Expression, error) {
 	e := p.parse()
 
 	var err error
-	if len(p.Errors()) > 0 {
-		err = ParseError{errors: p.Errors()}
+	if len(p.errors) > 0 {
+		err = ParseError{errors: p.errors}
 	}
 
 	return e, err
 }
 
+// MustParse the input filter expression to a goqrius Expression.
+// It panics if the expression is invalid.
 func MustParse(input string) Expression {
 	e, err := Parse(input)
 	if err != nil {

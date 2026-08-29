@@ -151,7 +151,8 @@ func (l *Lexer) readWhile(pred func(byte) bool) string {
 }
 
 // readSingleQuoted reads content inside single quotes, consuming both quotes.
-// If no closing quote is found, it reads until end and returns what was found (without the opening quote).
+// If no closing quote is found, it reads until end and returns what was found
+// (without the opening quote).
 func (l *Lexer) readSingleQuoted() string {
 	// consume opening quote
 	l.readChar()
